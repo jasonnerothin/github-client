@@ -15,3 +15,14 @@ project/plugins/project/
 # gradle stuff
 .gradle/
 build/
+
+# idea stuff
+.idea
+*.iml
+*.ipr
+*.iws
+
+# shitclipse stuff
+.classpath
+.project
+.eclipse
