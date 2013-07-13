@@ -1,6 +1,5 @@
 package com.jasonnerothin.githubclient.oauth
 
-import java.io.InputStream
 import java.net.URL
 import com.jasonnerothin.githubclient.oauth.AuthScope._
 
