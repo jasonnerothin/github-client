@@ -11,6 +11,10 @@ import org.scalatest._
 class AuthorizesSpec extends FunSuite{
 
 
+  test("authorization uses a nonce") (pending)
+
+  test("nonce is pretty unique") (pending)
+
   test("login works") (pending)
 
   test("callback works") (pending)

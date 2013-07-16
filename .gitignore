@@ -26,3 +26,7 @@ build/
 .classpath
 .project
 .eclipse
+
+# authentication stuff
+creds.sh
+github.oauth.properties
