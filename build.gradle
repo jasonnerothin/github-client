@@ -9,6 +9,7 @@ dependencies {
     compile 'org.springframework.security.oauth:spring-security-oauth:1.0.4.RELEASE'
     compile 'org.springframework:spring-web:3.2.3.RELEASE'
     testCompile 'org.scalatest:scalatest_2.10:1.9.1'
+    testCompile 'org.mockito:mockito-all:1.9.5'
 }
 
 task test(overwrite: true, dependsOn: testClasses) << {

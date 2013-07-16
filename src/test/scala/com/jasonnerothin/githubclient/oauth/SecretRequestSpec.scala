@@ -12,9 +12,10 @@ class SecretRequestSpec extends FunSuite {
 
   test("secrets should be kept"){
     val clientId = "clientId"
-    val testReq = new SecretRequest(clientId, "foo")
+    val secret = "very very secret"
+    val testReq = new SecretRequest(clientId, secret)
 
-    assert( testReq.clientSecret === testReq.secret )
+    assert( testReq.clientSecret === secret )
     assert( testReq.clientId === clientId )
 
   }
