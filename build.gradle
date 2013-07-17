@@ -6,8 +6,10 @@ repositories {
 
 dependencies {
     compile 'org.scala-lang:scala-library:2.10.2'
-    compile 'org.springframework.security.oauth:spring-security-oauth:1.0.4.RELEASE'
     compile 'org.springframework:spring-web:3.2.3.RELEASE'
+    compile 'org.json4s:json4s-native_2.10:3.2.4'
+    compile 'org.json4s:json4s-jackson_2.10:3.2.4'
+    compile 'net.databinder.dispatch:dispatch-core:0.10.1'
     testCompile 'org.scalatest:scalatest_2.10:1.9.1'
     testCompile 'org.mockito:mockito-all:1.9.5'
 }
