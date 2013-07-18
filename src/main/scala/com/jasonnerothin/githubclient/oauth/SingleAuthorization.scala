@@ -11,19 +11,17 @@ import scala.util.parsing.json.JSONObject
   * the shared-secret single authorization pattern described here:
   * http://developer.github.com/v3/oauth/#get-a-single-authorization
   */
-trait SingleAuthorization{
+trait SingleAuthorization {
 
   /** Request an OAuth token.
     *
     * @param request OAuth login information
     * @return Option, containing a successful token
     */
-  def login(request: OAuthRequest): Option[AuthToken] = None
+  def login(request: OAuthSettings): Option[AuthToken] = None
 
-  /** Whether token is still valid (has not timed out or been revoked)
-    * @param token to check
-    * @return if valid
-    */
-  def stillAuthorized(token: AuthToken): Boolean  = false
+}
+
+object SingleAuthorization extends Object with SingleAuthorization{
 
 }

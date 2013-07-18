@@ -12,7 +12,7 @@ import java.util.Properties
   * Provides a 2-or-more-param request class for auth requests
   * @deprecated not sure i want to keep this guy yet... untested, unused
   */
-class ClasspathPropertyRequest(propertyReader: Reader) extends OAuthRequest{
+class ClasspathPropertySettings(propertyReader: Reader) extends OAuthSettings{
 
   /** @return clientSecret - provided by github at registration of application
     */
@@ -21,6 +21,14 @@ class ClasspathPropertyRequest(propertyReader: Reader) extends OAuthRequest{
   /** @return github application's client id, set up during application registration
     */
   def clientId: String =  getProperty("clientId")
+
+  /** @return github username
+   */
+  def githubUser: String = getProperty("github.user")
+
+  /** @return github password
+    */
+  def githubPassword: String = getProperty("github.password")
 
   def getProperty(name: String): String = {
     val props = new Properties()

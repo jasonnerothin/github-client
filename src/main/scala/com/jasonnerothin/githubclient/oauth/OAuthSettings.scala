@@ -16,7 +16,7 @@ import _root_.com.jasonnerothin.githubclient.oauth.AuthScope._
   * @param scopes zero or more authorization scopes to request
   * @param state a mechanism to provide an unguessable random string for protection against cross site attacks
   */
-abstract class OAuthRequest(
+abstract class OAuthSettings(
     val redirectUri: Option[URL] = None,
     val loginUrl: Option[URL] = Some(new URL("https://github.com/login/oauth/")),
     val scopes: Array[AuthScope] = Array(AuthScope.default()),
@@ -33,5 +33,13 @@ abstract class OAuthRequest(
     * @return the String therefor, from whichever source
     */
   def clientSecret: String
+
+  /** @return github username
+    */
+  def githubUser: String
+
+  /** @return github user password
+    */
+  def githubPassword: String
 
 }

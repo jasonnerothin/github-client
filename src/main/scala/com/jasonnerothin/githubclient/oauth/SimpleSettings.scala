@@ -7,4 +7,9 @@ package com.jasonnerothin.githubclient.oauth
   * Time: 11:43 PM
   * Provides a 2-or-more-param request class for auth requests
   */
-class SecretRequest(val clientId: String, val clientSecret: String) extends OAuthRequest
+class SimpleSettings(
+  val clientId: String,
+  val clientSecret: String,
+  val githubUser: String,
+  val githubPassword: String
+) extends OAuthSettings

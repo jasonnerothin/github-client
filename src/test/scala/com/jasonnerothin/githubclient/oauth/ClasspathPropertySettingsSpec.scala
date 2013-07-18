@@ -17,7 +17,7 @@ import java.nio.charset.Charset
   * Date: 7/13/13
   * Time: 7:57 AM
   */
-class ClasspathPropertyRequestSpec extends FunSuite with MockitoSugar{
+class ClasspathPropertySettingsSpec extends FunSuite with MockitoSugar{
 
   val name1 = "clientSecret"
   val name2 = "clientId"
@@ -64,7 +64,7 @@ class ClasspathPropertyRequestSpec extends FunSuite with MockitoSugar{
     */
   def fixMe(){
 
-    val classpathPropertyRequest = new ClasspathPropertyRequest(mockProps)
+    val classpathPropertyRequest = new ClasspathPropertySettings(mockProps)
 
     val p1 = classpathPropertyRequest.getProperty(name1)
     assert( p1 === prop1 )
