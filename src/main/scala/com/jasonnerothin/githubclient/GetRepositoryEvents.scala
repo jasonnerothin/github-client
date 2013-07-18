@@ -1,7 +1,7 @@
 package com.jasonnerothin.githubclient
 
-import java.net.URI
 import com.jasonnerothin.githubclient.oauth._
+import net.liftweb.json.JsonAST.JValue
 
 /** Created by IntelliJ IDEA.
   * User: jason
@@ -10,9 +10,7 @@ import com.jasonnerothin.githubclient.oauth._
   * Provides a mechanism for getting repository events: see
   * http://developer.github.com/v3/activity/events/#list-repository-events for more info...
   */
-class GetRepositoryEvents(val repository: String, override val settings: OAuthSettings)
-  extends GithubProxy(settings, requestMapping = new URI("/repos/%s/%s/events".format(settings.githubUser, repository)))
-  with AuthorizationValidation {
+class GetRepositoryEvents(val repository: String){
 
   /** An arbitrary Github RESTful http call.
     * @param token must be authenticated
@@ -20,11 +18,9 @@ class GetRepositoryEvents(val repository: String, override val settings: OAuthSe
     * @param params optional JSon payload (e.g. for PUTs)
     * @return a json result
     */
-  def call(token: AuthToken, query: Option[Map[String, AnyRef]] = None, params: Option[String]): String = {
-    validate(token, settings)
-
-//    new JObject(List(JField("foo",JString("bar"))))
-    ""
+  def call(token: AuthToken, query: Option[Map[String, AnyRef]] = None, params: Option[String])
+          (implicit settings: OAuthSettings, authCheck: AuthorizationCheck): JValue = {
+    null
   }
 
 }
