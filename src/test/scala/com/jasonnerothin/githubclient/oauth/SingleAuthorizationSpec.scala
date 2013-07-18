@@ -4,9 +4,13 @@ import org.scalatest._
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import scala.util.Random
-import java.net.URL
-import _root_.com.jasonnerothin.githubclient.oauth.AuthScope._
-import scala.util.parsing.json.JSONObject
+import dispatch.Http
+import org.mockito.Matchers._
+import com.ning.http.client.{AsyncHandler, Request}
+import scala.concurrent.ExecutionContext
+import scala.Predef._
+import com.jasonnerothin.MyRandom
+import java.util.concurrent.Future
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,90 +20,81 @@ import scala.util.parsing.json.JSONObject
  */
 class SingleAuthorizationSpec extends FunSuite with MockitoSugar{
 
-  val auth = new SingleAuthorization {}
   val rand = new Random
-  val testClientId = rand.nextString(4)
-  val testClientSecret = rand.nextString(6)
-  val testLoginUrl = Some(mock[URL])
-  val testScopes = mock[Array[AuthScope]]
-  val testState = None
 
-  def mockRequest() = {
-    val request = mock[OAuthSettings]
-    when(request.clientId).thenReturn(testClientId)
-    when(request.clientSecret).thenReturn(testClientSecret)
-    when(request.loginUrl).thenReturn(testLoginUrl)
-    when(request.redirectUri).thenReturn(None)
-    when(request.scopes).thenReturn(testScopes)
-    when(request.state).thenReturn(testState)
-    request
+  def systemUnderTest(id: Int = rand.nextInt(), settings:OAuthSettings = mockSettings(), http:Http = mockHttp(randomString(4))): Option[AuthToken] = {
+    new SingleAuthorization{}.login(http)(settings)
   }
 
-  def mockGithubServer() = {
-
+  def mockSettings(): OAuthSettings = {
+    val settings = mock[OAuthSettings]
+    doReturn(randomString(3)).when(settings).clientId
+    doReturn(randomString(3)).when(settings).clientSecret
+    doReturn(randomString(3)).when(settings).githubPassword
+    doReturn(randomString(3)).when(settings).githubUser
+    settings
   }
 
-  test("login returns a token on happy path"){
-
-    val result = systemUnderTest()
-
-    assert( !result.isEmpty )
-
-    val token = result.get.token
-    assert( token != None )
-    assert( !token.isEmpty )
-
+  def mockToken(): AuthToken = {
+    val tok = mock[AuthToken]
+    doReturn(rand.nextInt()).when(tok).id
+    doReturn(randomString(18)).when(tok).token
+    tok
   }
 
-  def systemUnderTest(): Option[AuthToken] = {
-    val request = mockRequest()
-    auth.login(request)
+  def mockHttp(tokenStr: String = randomString(7)): Http = {
+    val http = mock[Http]
+
+    val token = mockToken()
+    doReturn(tokenStr).when(token).token
+
+    val futureToken = mock[Future[AuthToken]]
+    doReturn(token).when(futureToken).get
+    doReturn(futureToken).when(http).apply(isA(classOf[(Request, AsyncHandler[AuthToken])]))(any[ExecutionContext])
+    http
+  }
+
+  def mockAuthorizationCheck(): AuthorizationCheck = {
+    mock[AuthorizationCheck]
+  }
+
+  test("login returns a token in the AuthToken")(pending)
+  def t1(){
+
+    val tok = randomString(4)
+    val http = mockHttp(tokenStr = tok)
+    val result = systemUnderTest(http = http)
+
+    assert( result.isDefined )
+    val actual = result.get.token
+    assert( actual === tok, "Token '%s' returned from server did not show up in the AuthToken.token '%s'.".format(tok, actual))
+
   }
 
   /** this isn't technically a requirement of the API, but is a behavior of the trait,
     * so we'll hold it down with a test anyway
     */
-  test("login returns a user in the AuthToken"){
-    val result = systemUnderTest().get
-    val user = result.user.get
-    assert( user != None )
-    assert( !user.isEmpty )
-  }
+  test("login returns an id in the AuthToken")(pending)
+  def t2(){
+    val settings = mockSettings()
+    val testId = rand.nextInt()
+    val result = systemUnderTest(settings = settings, id = testId)
 
-  def mockBadMessage(message: String): JSONObject = {
-    val badCredentials = mock[JSONObject]
-    val badMap = mock[Map[String, AnyRef]]
-    when(badCredentials.obj).thenReturn(badMap)
-    doReturn(message).when(badMap get "message")
-    badCredentials
-  }
-
-  def mockBadCredentials(){
-    mockBadMessage("Bad credentials")
-  }
-
-  def mockBadClientInfo(){
-    mockBadMessage("Invalid OAuth application client_id or secret.")
-  }
-
-  test("login returns None when we use a bad client_id") {
-    val badClientInfo = mockBadClientInfo()
+    assert( result.isDefined )
+    assert( result.get.id === testId, "Authorization id '%s' returned from the server isn't in the AuthToken.id field: '%s'.".format(testId, result.get.id) )
 
   }
 
-  test("login returns None when we use a bad client_secret"){
-    val badClientInfo = mockBadClientInfo()
+  test("login returns None when authorization fails")(pending)
+  def t3(){
 
+    val http = mockHttp()
+    doReturn(None).when(http).apply(isA(classOf[(Request, AsyncHandler[AuthToken])]))(any[ExecutionContext])
 
+    val actual = systemUnderTest(http=http)
+    assert( actual === true )
   }
 
-  test("login returns None when we use a bad username"){
-    val badCredentials = mockBadCredentials()
-
-  }
-
-  test("login returns None when we use a bad password"){
-    val badCredentials = mockBadCredentials()
-  }
+  def randomString(len: Int) = MyRandom.randomString(len)
 
 }

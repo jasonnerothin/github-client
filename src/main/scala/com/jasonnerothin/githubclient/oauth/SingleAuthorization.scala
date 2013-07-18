@@ -1,6 +1,6 @@
 package com.jasonnerothin.githubclient.oauth
 
-import scala.util.parsing.json.JSONObject
+import dispatch.Http
 
 /**
   * Created by IntelliJ IDEA.
@@ -9,19 +9,17 @@ import scala.util.parsing.json.JSONObject
   * Time: 12:08 PM
   * Provides a mechanism for obtaining an OAuth token from github using
   * the shared-secret single authorization pattern described here:
-  * http://developer.github.com/v3/oauth/#get-a-single-authorization
+  * http://developer.github.com/v3/oauth/#create-a-new-authorization
   */
 trait SingleAuthorization {
 
   /** Request an OAuth token.
     *
-    * @param request OAuth login information
+    * @param settings OAuth login information
     * @return Option, containing a successful token
     */
-  def login(request: OAuthSettings): Option[AuthToken] = None
+  def login(http:Http)(implicit settings: OAuthSettings): Option[AuthToken] = None
 
 }
 
-object SingleAuthorization extends Object with SingleAuthorization{
-
-}
+object SingleAuthorization extends Object with SingleAuthorization{}

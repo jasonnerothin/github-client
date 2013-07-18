@@ -7,6 +7,6 @@ package com.jasonnerothin.githubclient.oauth
   * Time: 12:20 PM
   *
   * @param token required token string
-  * @param user optional github username
+  * @param id optional authorization id
   */
-class AuthToken(val token: String, val user: Option[String] = None)
+class AuthToken(val token: String, val id: Integer)
