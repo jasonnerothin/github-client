@@ -2,14 +2,12 @@ package com.jasonnerothin.githubclient.oauth
 
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.FunSuite
-import java.io.{InputStreamReader, Reader, InputStream}
+import scala.util.Random
+import java.io.InputStreamReader
 import org.mockito.Matchers._
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer._
 import org.mockito.Mockito._
 import org.mockito.stubbing.Answer
-import org.mockito.{Matchers, Mockito}
-import java.nio.charset.Charset
 
 /**
   * Created by IntelliJ IDEA.
@@ -19,10 +17,11 @@ import java.nio.charset.Charset
   */
 class ClasspathPropertySettingsSpec extends FunSuite with MockitoSugar{
 
-  val name1 = "clientSecret"
-  val name2 = "clientId"
-  val prop1 = "prop1"
-  val prop2 = "prop3"
+  val rand = new Random
+  val name1 = rand.nextString(4)
+  val name2 = rand.nextString(3)
+  val prop1 = rand.nextString(6)
+  val prop2 = rand.nextString(7)
   val testContent = name1 + "=" + prop1 + "\n" + name2 + "=" + prop2 + "\n"
 
   def mockProps = {
