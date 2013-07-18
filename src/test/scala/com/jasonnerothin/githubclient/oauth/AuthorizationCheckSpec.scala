@@ -4,11 +4,11 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.FunSuite
 import com.ning.http.client.{AsyncHandler, Response, Request}
 import _root_.dispatch.Http
-import scala.util.Random
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import scala.concurrent.{Future, ExecutionContext}
 import net.liftweb.json.JsonAST.JValue
+import com.jasonnerothin.MyRandom
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,7 +19,6 @@ import net.liftweb.json.JsonAST.JValue
  */
 class AuthorizationCheckSpec extends FunSuite with MockitoSugar {
 
-  val rand = new Random()
   val timeoutMs = 1
 
   def systemUnderTest(settings: OAuthSettings = mockSettings(), token: AuthToken = mockAuthToken(), http: Http = mockHttp()):Boolean= {
@@ -49,7 +48,6 @@ class AuthorizationCheckSpec extends FunSuite with MockitoSugar {
     val http = mock[Http]
     //    doReturn(futureResponse).when(http).apply(isA(classOf[RequestBuilder]))(any[ExecutionContext])
     doReturn(futureResponse).when(http).apply(isA(classOf[(Request, AsyncHandler[Boolean])]))(any[ExecutionContext])
-    //    doReturn(futureResponse).when(http).apply(isA(classOf[Request]), any[AsyncHandler[Boolean]])(any[ExecutionContext])
 
     http
   }
@@ -97,17 +95,6 @@ class AuthorizationCheckSpec extends FunSuite with MockitoSugar {
 
   }
 
-  def randomString(len:Int):String = {
-    val buf = new StringBuilder
-    for( i <- 0 to len)
-      buf.append(nextPrintableChar())
-    buf.toString()
-  }
-
-  def nextPrintableChar(): Char = {
-    val low = 65
-    val high = 90
-    (rand.nextInt(high - low) + low).toChar
-  }
+  def randomString(len: Int) = MyRandom.randomString(len)
 
 }
