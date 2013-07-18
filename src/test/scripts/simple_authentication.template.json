@@ -1,0 +1,9 @@
+{ 
+  "client_id":"CLIENT_ID", 
+  "client_secret":"CLIENT_SECRET", 
+  "note":"curl simple authentication test",
+  "scopes":[
+    "public_repo",
+    "repo:status"
+  ]
+}
