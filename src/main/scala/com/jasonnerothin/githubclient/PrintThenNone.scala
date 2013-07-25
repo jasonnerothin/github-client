@@ -9,11 +9,14 @@ package com.jasonnerothin.githubclient
  */
 trait PrintThenNone {
 
-  def apply(t: Throwable) = {
+  @throws(classOf[Error])
+  def apply(t: Throwable):Option[AnyRef] = {
 
-    case r: RuntimeException => printMessage(r)
-    case e: Error => throw e
-    case _ => printMessage(t)
+    t match {
+      case r: RuntimeException => printMessage(r)
+      case e: Error => throw e
+      case _ => printMessage(t)
+    }
 
     None
   }
@@ -22,4 +25,4 @@ trait PrintThenNone {
 
 }
 
-object printThenNone extends Object with PrintThenNone
+object PrintThenNone extends Object with PrintThenNone
