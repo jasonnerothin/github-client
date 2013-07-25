@@ -6,9 +6,7 @@ import net.liftweb.json._
 import scala.concurrent.ExecutionContext
 import com.ning.http.client.{AsyncHandler, Request, RequestBuilder}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Success}
-import com.jasonnerothin.githubclient.{MakeLiftJson, PrintAndNone}
+import com.jasonnerothin.githubclient.MakeLiftJson
 
 /**
  * Created by IntelliJ IDEA.
