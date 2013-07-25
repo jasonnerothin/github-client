@@ -17,12 +17,12 @@ import com.jasonnerothin.MyRandom
  * Time: 6:44 PM
  * Provides...
  */
-class AuthorizationCheckSpec extends FunSuite with MockitoSugar {
+class CheckAuthorizationSpec extends FunSuite with MockitoSugar {
 
   val timeoutMs = 1
 
   def systemUnderTest(settings: OAuthSettings = mockSettings(), token: AuthToken = mockAuthToken(), http: Http = mockHttp()):Boolean= {
-    new AuthorizationCheck {}.authorized(token = token, settings = settings, http = http, timeoutMs = timeoutMs)
+    new CheckAuthorization {}.authorized(token = token, settings = settings, http = http, timeoutMs = timeoutMs)
   }
 
   def mockSettings(githubUser: String = randomString(4), clientId: String = randomString(5), githubPassword: String = randomString(7)): OAuthSettings = {

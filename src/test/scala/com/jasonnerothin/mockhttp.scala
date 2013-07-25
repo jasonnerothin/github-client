@@ -1,6 +1,6 @@
 package com.jasonnerothin.githubclient
 
-import com.jasonnerothin.githubclient.oauth.{AuthToken, OAuthSettings, AuthorizationCheck}
+import com.jasonnerothin.githubclient.oauth.{AuthToken, OAuthSettings, CheckAuthorization}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import scala.util.Random
@@ -9,8 +9,8 @@ import com.ning.http.client.{AsyncHttpClientConfig, AsyncHttpProvider}
 
 trait MockSugar extends MockitoSugar{
 
-  def $authorizationCheck(): AuthorizationCheck = {
-    mock[AuthorizationCheck]
+  def $authorizationCheck(): CheckAuthorization = {
+    mock[CheckAuthorization]
   }
 
   def $oAuthSettings(): OAuthSettings = {
