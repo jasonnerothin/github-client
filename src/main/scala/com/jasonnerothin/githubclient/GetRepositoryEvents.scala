@@ -19,7 +19,7 @@ class GetRepositoryEvents(val repository: String){
     * @return a json result
     */
   def call(token: AuthToken, query: Option[Map[String, AnyRef]] = None, params: Option[String])
-          (implicit settings: OAuthSettings, authCheck: AuthorizationCheck): JValue = {
+          (implicit settings: OAuthSettings, authCheck: CheckAuthorization): JValue = {
     null
   }
 

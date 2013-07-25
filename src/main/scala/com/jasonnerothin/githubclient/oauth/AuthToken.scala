@@ -9,4 +9,4 @@ package com.jasonnerothin.githubclient.oauth
   * @param token required token string
   * @param id optional authorization id
   */
-class AuthToken(val token: String, val id: Integer)
+case class AuthToken(token: String, id: Integer)

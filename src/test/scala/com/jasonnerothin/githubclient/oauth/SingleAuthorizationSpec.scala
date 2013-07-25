@@ -4,13 +4,18 @@ import org.scalatest._
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import scala.util.Random
-import dispatch.Http
+import dispatch._
 import org.mockito.Matchers._
-import com.ning.http.client.{AsyncHandler, Request}
+import com.ning.http.client._
 import scala.concurrent.ExecutionContext
 import scala.Predef._
-import com.jasonnerothin.MyRandom
-import java.util.concurrent.Future
+
+import com.jasonnerothin.githubclient.Mock$._
+import com.jasonnerothin.githubclient.{FakeHttpClient, MakeLiftJson}
+import scala.Some
+import java.nio.ByteBuffer
+import java.util.concurrent.TimeUnit
+import scala.actors.threadpool.Executor
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,83 +23,132 @@ import java.util.concurrent.Future
  * Date: 7/10/13
  * Time: 10:51 PM
  */
-class SingleAuthorizationSpec extends FunSuite with MockitoSugar{
+class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   val rand = new Random
+  val defaultId = Math.abs(rand.nextInt())
+  val defaultToken = randomString(30)
 
-  def systemUnderTest(id: Int = rand.nextInt(), settings:OAuthSettings = mockSettings(), http:Http = mockHttp(randomString(4))): Option[AuthToken] = {
-    new SingleAuthorization{}.login(http)(settings)
+  implicit val executionContext = mock[ExecutionContext]
+
+  class FakeResponder(jsonAsString: String = authSuccessJson()) extends (Response => String) {
+    def apply(response: Response) = jsonAsString
   }
 
-  def mockSettings(): OAuthSettings = {
-    val settings = mock[OAuthSettings]
-    doReturn(randomString(3)).when(settings).clientId
-    doReturn(randomString(3)).when(settings).clientSecret
-    doReturn(randomString(3)).when(settings).githubPassword
-    doReturn(randomString(3)).when(settings).githubUser
-    settings
+  def systemUnderTest(id: Int = defaultId,
+                      tokenStr: String = defaultToken,
+                      settings: OAuthSettings = $oAuthSettings(),
+                      http: Http = mockHttp(authSuccessJson()),
+                      makeJson: MakeLiftJson = new MakeLiftJson(new FakeResponder())): Option[AuthToken] = {
+
+    (new Object with SingleAuthorization).login(http, makeJson)(settings, executionContext)
+
   }
 
-  def mockToken(): AuthToken = {
-    val tok = mock[AuthToken]
-    doReturn(rand.nextInt()).when(tok).id
-    doReturn(randomString(18)).when(tok).token
-    tok
+  def authSuccessJson(tokenStr: String = defaultToken, id: Int = defaultId): String = { """
+    {
+      "id":"%s",
+      "url": "https://api.github.com/authorizations/%s",
+      "app": {
+        "name":"Some_Application",
+        "url":"https://jasonnerothin.com/",
+        "client_id":"41234123412341234123"},
+        "token":"%s",
+        "note":"simple authorization test",
+        "note_url":"feeling a little testy",
+        "created_at":"2013-07-22T16:06:20Z",
+        "updated_at":"2013-07-22T16:06:20Z",
+        "scopes":["public_repo","repo:status"]
+    }""".format(id, id, tokenStr)
+
   }
 
-  def mockHttp(tokenStr: String = randomString(7)): Http = {
-    val http = mock[Http]
+  def mockHttp(jsonAsString: String = authSuccessJson()): Http = {
 
-    val token = mockToken()
-    doReturn(tokenStr).when(token).token
 
-    val futureToken = mock[Future[AuthToken]]
-    doReturn(token).when(futureToken).get
-    doReturn(futureToken).when(http).apply(isA(classOf[(Request, AsyncHandler[AuthToken])]))(any[ExecutionContext])
-    http
+    val response = mock[Response]
+    doReturn("application/json").when(response).getContentType
+    doReturn(200).when(response).getStatusCode
+    doReturn("OK").when(response).getStatusText
+    doReturn(jsonAsString).when(response).getResponseBody
+    val buf = ByteBuffer.allocate(jsonAsString.length)
+    for( ch <- jsonAsString.toCharArray ) buf.put(ch.toByte)
+    doReturn(buf).when(response).getResponseBodyAsByteBuffer
+    doReturn(buf.array()).when(response).getResponseBodyAsBytes
+    doReturn(false).when(response).isRedirected
+//    doReturn(true).when(response).isInstanceOf(isA(classOf[Response]))
+
+
+    val futureResponse = mock[ListenableFuture[Response]]
+    doReturn(response).when(futureResponse).get
+    doReturn(true).when(futureResponse).isDone
+    doReturn(false).when(futureResponse).isCancelled
+    doReturn(response).when(futureResponse).get(isA(classOf[Int]), isA(classOf[TimeUnit]))
+    doReturn(futureResponse).when(futureResponse).addListener(isA(classOf[Runnable]), any())
+
+
+    new Http(new FakeHttpClient(futureResponse))
+
   }
 
-  def mockAuthorizationCheck(): AuthorizationCheck = {
-    mock[AuthorizationCheck]
-  }
+  test("login returns an actual AuthToken")(pendingUntilFixed {
 
-  test("login returns a token in the AuthToken")(pending)
-  def t1(){
+    val result = systemUnderTest()
+    assert(result.isDefined)
 
-    val tok = randomString(4)
-    val http = mockHttp(tokenStr = tok)
-    val result = systemUnderTest(http = http)
+    val actual = result.get
+    actual match {
+      case AuthToken(tok, i) => {
+        assert(tok === defaultToken)
+        assert(i === defaultId)
+      }
+      case _ => throw new AssertionError("Actual result is not an AuthToken: %s".format(actual.toString))
+    }
 
-    assert( result.isDefined )
+  })
+
+  test("login returns a token in the AuthToken")(pendingUntilFixed {
+
+    val token = randomString(4)
+    val http = mockHttp(jsonAsString = authSuccessJson(token))
+    val result = systemUnderTest(http = http, tokenStr = token)
+
+    assert(result.isDefined)
     val actual = result.get.token
-    assert( actual === tok, "Token '%s' returned from server did not show up in the AuthToken.token '%s'.".format(tok, actual))
+    assert(actual === token, "Token '%s' returned from server did not show up in the AuthToken.token '%s'.".format(token, actual))
 
-  }
+  })
 
   /** this isn't technically a requirement of the API, but is a behavior of the trait,
     * so we'll hold it down with a test anyway
     */
-  test("login returns an id in the AuthToken")(pending)
-  def t2(){
-    val settings = mockSettings()
-    val testId = rand.nextInt()
-    val result = systemUnderTest(settings = settings, id = testId)
+  test("login returns an id in the AuthToken")(pendingUntilFixed {
 
-    assert( result.isDefined )
-    assert( result.get.id === testId, "Authorization id '%s' returned from the server isn't in the AuthToken.id field: '%s'.".format(testId, result.get.id) )
+    val testId = Math.abs(rand.nextInt())
+    val result = systemUnderTest(settings = $oAuthSettings(), id = testId)
 
-  }
+    assert(result.isDefined)
+    assert(result.get.id === testId, "Authorization id '%s' returned from the server isn't in the AuthToken.id field: '%s'.".format(testId, result.get.id))
 
-  test("login returns None when authorization fails")(pending)
-  def t3(){
+  })
 
-    val http = mockHttp()
-    doReturn(None).when(http).apply(isA(classOf[(Request, AsyncHandler[AuthToken])]))(any[ExecutionContext])
+  test("login returns None when authorization fails")(pendingUntilFixed {
 
-    val actual = systemUnderTest(http=http)
-    assert( actual === true )
-  }
+    val http = mockHttp(authSuccessJson())
 
-  def randomString(len: Int) = MyRandom.randomString(len)
+    val response = mock[Response]
+    doReturn(401).when(response).getStatusCode
+
+    val futureResponse = mock[Future[Response]]
+    doReturn(true).when(futureResponse).isCompleted
+    doReturn(Some(response)).when(futureResponse).value
+    doReturn(Some(response)).when(futureResponse).completeOption
+
+    doReturn(futureResponse).when(http).apply(isA(classOf[RequestBuilder]))(any[ExecutionContext])
+
+    val actual = systemUnderTest(http = http)
+    assert(actual === None)
+
+  })
 
 }
