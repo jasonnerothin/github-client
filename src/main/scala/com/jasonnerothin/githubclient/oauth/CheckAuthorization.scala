@@ -3,7 +3,8 @@ package com.jasonnerothin.githubclient.oauth
 import dispatch._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import net.liftweb.json.JsonAST.JValue
+import net.liftweb.json.JsonAST.{JNothing, JValue}
+import scala.util.Try
 
 /**
   * Copyright (c) 2013 jasonnerothin.com
@@ -39,8 +40,8 @@ trait CheckAuthorization {
     def authCheck = url("https://api.github.com/applications/%s/tokens/%s".format(settings.clientId, token.token))
       .secure.as_!(settings.githubUser, settings.githubPassword) <:< Map("Accept:"-> "application/json")
 
-    val result: Future[JValue] = http(authCheck OK as.lift.Json)
-    Thread.sleep(timeoutMs)
+    val result: Future[JValue] = Try(http(authCheck OK as.lift.Json)) getOrElse Future(JNothing)
+    Thread.sleep(timeoutMs) // TODO make async
     result.isCompleted
 
   }
