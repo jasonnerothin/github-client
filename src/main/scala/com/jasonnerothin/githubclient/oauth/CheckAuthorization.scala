@@ -33,7 +33,7 @@ trait CheckAuthorization {
     * @param timeoutMs amount of time to wait for the server to respond
     * @return if valid
     */
-  def authorized(token: AuthToken, settings: OAuthSettings, http: Http = new Http(), timeoutMs: Long = 1250): Boolean = {
+  def authorized(token: AuthToken, http: Http = new Http(), timeoutMs: Long = 1250)(implicit settings: OAuthSettings): Boolean = {
 
     // /applications/:client_id/tokens/:access_token
     def authCheck = url("https://api.github.com/applications/%s/tokens/%s".format(settings.clientId, token.token))
