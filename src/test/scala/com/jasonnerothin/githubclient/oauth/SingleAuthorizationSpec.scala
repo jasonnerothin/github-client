@@ -10,7 +10,7 @@ import com.ning.http.client._
 import scala.concurrent.ExecutionContext
 import scala.Predef._
 
-import com.jasonnerothin.githubclient.Mock$._
+import com.jasonnerothin.MockHttp$._
 import com.jasonnerothin.githubclient.MakeLiftJson
 import scala.Some
 import java.nio.ByteBuffer
