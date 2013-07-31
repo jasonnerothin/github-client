@@ -33,7 +33,7 @@ class CheckAuthorizationSpec extends FunSuite with MockitoSugar {
   val timeoutMs = 1
 
   def systemUnderTest(settings: OAuthSettings = mockSettings(), token: AuthToken = mockAuthToken(), http: Http = mockHttp()):Boolean= {
-    new CheckAuthorization {}.authorized(token = token, settings = settings, http = http, timeoutMs = timeoutMs)
+    CheckAuthorization.authorized(token = token, settings = settings, http = http, timeoutMs = timeoutMs)
   }
 
   def mockSettings(githubUser: String = randomString(4), clientId: String = randomString(5), githubPassword: String = randomString(7)): OAuthSettings = {

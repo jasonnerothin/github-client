@@ -47,5 +47,4 @@ trait CheckAuthorization {
 
 }
 
-object CheckAuthorization extends Object with CheckAuthorization {
-}
+object CheckAuthorization extends Object with CheckAuthorization
