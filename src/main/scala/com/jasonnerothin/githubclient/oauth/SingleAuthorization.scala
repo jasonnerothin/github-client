@@ -6,10 +6,11 @@ import net.liftweb.json._
 import scala.concurrent.{Future, ExecutionContext}
 import com.ning.http.client.{Response, Request, RequestBuilder}
 
-import com.jasonnerothin.githubclient.MakeLiftJson
+import com.jasonnerothin.githubclient.{PrintThenNone, MakeLiftJson}
 import scala.util.{Try, Failure, Success}
 import scala.Option
 import net.liftweb.json
+import com.apple.jobjc.NativeObjectLifecycleManager.Nothing
 
 /**
   * Copyright (c) 2013 jasonnerothin.com
@@ -51,7 +52,7 @@ trait SingleAuthorization {
 
     val request:RequestBuilder = (host("api.github.com") / "authorizations")
       .secure.as_!(settings.githubUser, settings.githubPassword) <:< Map("Accept" -> "application/json")
-    val futureJson = myExecutor.apply(request OK makeJson)
+    val futureJson = Try(myExecutor(request OK makeJson)) getOrElse Future(JNothing)
 
     val jObj = futureJson.completeOption match {
       case Some(jo:JObject) => jo

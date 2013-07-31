@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit
 import net.liftweb.json
 import com.jasonnerothin.{FakeHttpProvider, FakeHttpClient}
 
-
 /**
   * Copyright (c) 2013 jasonnerothin.com
   *
@@ -45,13 +44,13 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   implicit val oAuthSettings: OAuthSettings = $oAuthSettings()
 
-  class FakeResponder(jsonAsString: String = authSuccessJson()) extends (Response => String) {
+  class FakeResponder(jsonAsString: String = authSuccessJson(tokenStr=defaultToken, id=defaultId)) extends (Response => String) {
     def apply(response: Response) = jsonAsString
   }
 
   def systemUnderTest(id: Int = defaultId,
-                      tokenStr: String = defaultToken,
-                      http: HttpExecutor = mockHttp(authSuccessJson()),
+                      myTokenStr: String = defaultToken,
+                      http: HttpExecutor = mockHttp(authSuccessJson(tokenStr = defaultToken, id=defaultId)),
                       makeJson: (Response => json.JValue) = new MakeLiftJson(new FakeResponder())): Option[AuthToken] = {
 
     (new Object with SingleAuthorization).login(http, makeJson)
@@ -76,7 +75,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   }
 
-  def mockHttp(jsonAsString: String = authSuccessJson()): HttpExecutor = {
+  def mockHttp(jsonAsString: String = authSuccessJson(), statusCode:Int = 200): HttpExecutor = {
 
     val response = mock[Response]
     doReturn("application/json").when(response).getContentType
@@ -100,7 +99,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
     doReturn(true).when(futureString).isCompleted
     doReturn(futureString).when(futureString).map(any())(any[ExecutionContext])
 
-    val provider = new FakeHttpProvider(response = response, listenableFuture = listenableFuture)
+    val provider = new FakeHttpProvider(response = response, listenableFuture = listenableFuture, statusCode = statusCode)
     new FakeHttpClient(future = futureString, listenableFutureResponse = listenableFuture, provider = provider)
 
   }
@@ -121,49 +120,54 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   }
 
-  test("login returns a token in the AuthToken") (pendingUntilFixed{
+  test("login returns a token in the AuthToken") {
 
     val token = randomString(4)
-    val http = mockHttp(jsonAsString = authSuccessJson(tokenStr = token))
-    val result = systemUnderTest(http = http, tokenStr = token)
+    val result = parameterizedSUT(token, defaultId)
 
     assert(result.isDefined)
     val actual = result.get.token
-    assert(actual === token, "Token '%s' returned from server did not show up in the AuthToken.token '%s'.".format(token, actual))
+    assert(actual === token, "Token string '%s' (returned from the server) did not end up in AuthToken.token '%s'.".format(token, actual))
 
-  })
+  }
+
+  def parameterizedSUT(token: String, testId: Int): Option[AuthToken] = {
+    val json = authSuccessJson(tokenStr = token, id = testId)
+    val http = mockHttp(jsonAsString = json)
+    val result = systemUnderTest(http = http, makeJson = new MakeLiftJson(new FakeResponder(jsonAsString = json)))
+    result
+  }
 
   /** this isn't technically a requirement of the API, but is a behavior of the trait,
     * so we'll hold it down with a test anyway
     */
-  test("login returns an id in the AuthToken")(pendingUntilFixed {
+  test("login returns an id in the AuthToken"){
 
     val testId = Math.abs(rand.nextInt())
-    val http = mockHttp(jsonAsString = authSuccessJson(id = testId))
-    val result = systemUnderTest(id = testId, http = http)
+    val result = parameterizedSUT(defaultToken, testId)
 
     assert(result.isDefined)
     assert(result.get.id === testId, "Authorization id '%s' returned from the server isn't in the AuthToken.id field: '%s'.".format(testId, result.get.id))
 
-  })
+  }
 
-  test("login returns None when authorization fails")(pendingUntilFixed {
+  test("login returns None when authorization fails"){
 
-    val http = mockHttp(authSuccessJson())
+    val http = mockHttp(authSuccessJson(), statusCode = 401)
 
-    val response = mock[Response]
-    doReturn(401).when(response).getStatusCode
+//    val response = mock[Response]
+//    doReturn(401).when(response).getStatusCode
 
-    val futureResponse = mock[Future[Response]]
-    doReturn(true).when(futureResponse).isCompleted
-    doReturn(Some(response)).when(futureResponse).value
-    doReturn(Some(response)).when(futureResponse).completeOption
+//    val futureResponse = mock[Future[Response]]
+//    doReturn(true).when(futureResponse).isCompleted
+//    doReturn(Some(response)).when(futureResponse).value
+//    doReturn(Some(response)).when(futureResponse).completeOption
 
-    doReturn(futureResponse).when(http).apply(isA(classOf[RequestBuilder]))(any[ExecutionContext])
+//    doReturn(futureResponse).when(http).apply(isA(classOf[RequestBuilder]))(any[ExecutionContext])
 
     val actual = systemUnderTest(http = http)
     assert(actual === None)
 
-  })
+  }
 
 }

@@ -119,10 +119,24 @@ class FakeHttpClient[U](val future: Future[U],
 
 }
 
-class FakeHttpProvider(response: Response, listenableFuture: ListenableFuture[Response]) extends AsyncHttpProvider {
+class FakeHttpProvider(response: Response, listenableFuture: ListenableFuture[Response], statusCode: Int = 200, statusText:String = "OK") extends AsyncHttpProvider {
 
   def execute[U](request: Request, handler: AsyncHandler[U]): ListenableFuture[U] = {
     val result = handler.onCompleted()
+    val status:HttpResponseStatus = new HttpResponseStatus(null, this){
+      def getStatusCode = statusCode
+
+      def getStatusText = statusText
+
+      def getProtocolName = "http"
+
+      def getProtocolMajorVersion = 1
+
+      def getProtocolMinorVersion = 1
+
+      def getProtocolText = ""
+    }
+    handler.onStatusReceived(status)
     val listenableFuture: ListenableFuture[U] = new AbstractListenableFuture[U] {
       def isCancelled = false
 
