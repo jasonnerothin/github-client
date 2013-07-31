@@ -1,4 +1,4 @@
-package com.jasonnerothin.githubclient
+package com.jasonnerothin
 
 import com.ning.http.client._
 import dispatch._
@@ -7,7 +7,7 @@ import scala.concurrent._
 import scala.util.Try
 
 import com.jasonnerothin.githubclient.Mock$._
-import scala.{util, Some}
+import scala.Some
 import scala.reflect.ClassTag
 import java.util.{concurrent => juc}
 import java.util.concurrent.{Callable, Executor, TimeUnit}
