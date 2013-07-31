@@ -1,7 +1,7 @@
 package com.jasonnerothin.githubclient.oauth
 
 /**
-  * Created by IntelliJ IDEA.
+  * Copyright (c) 2013 jasonnerothin.com
   * User: jason
   * Date: 7/12/13
   * Time: 10:57 PM

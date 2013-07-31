@@ -4,7 +4,7 @@ import java.io.{Reader, InputStream}
 import java.util.Properties
 
 /**
-  * Created by IntelliJ IDEA.
+  * Copyright (c) 2013 jasonnerothin.com
   * User: jason
   * Date: 7/12/13
   * Time: 11:36 PM

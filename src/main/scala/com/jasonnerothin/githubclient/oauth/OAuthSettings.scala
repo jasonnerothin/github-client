@@ -4,7 +4,7 @@ import java.net.URL
 import _root_.com.jasonnerothin.githubclient.oauth.AuthScope._
 
 /**
-  * Created by IntelliJ IDEA.
+  * Copyright (c) 2013 jasonnerothin.com
   * User: jason
   * Date: 7/12/13
   * Time: 12:11 PM

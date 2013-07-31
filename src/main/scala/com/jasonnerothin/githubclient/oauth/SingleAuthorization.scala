@@ -12,14 +12,14 @@ import scala.Option
 import net.liftweb.json
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/12/13
- * Time: 12:08 PM
- * Provides a mechanism for obtaining an OAuth token from github using
- * the shared-secret single authorization pattern described here:
- * http://developer.github.com/v3/oauth/#create-a-new-authorization
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/12/13
+  * Time: 12:08 PM
+  * Provides a mechanism for obtaining an OAuth token from github using
+  * the shared-secret single authorization pattern described here:
+  * http://developer.github.com/v3/oauth/#create-a-new-authorization
+  */
 trait SingleAuthorization {
 
   implicit val formats = DefaultFormats

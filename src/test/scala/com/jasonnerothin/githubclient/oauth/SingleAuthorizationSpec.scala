@@ -19,11 +19,11 @@ import net.liftweb.json
 
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/10/13
- * Time: 10:51 PM
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/10/13
+  * Time: 10:51 PM
+  */
 class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   val rand = new Random

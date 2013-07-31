@@ -4,11 +4,11 @@ import org.scalatest.FunSuite
 import scala.util.Random
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/12/13
- * Time: 11:50 PM
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/12/13
+  * Time: 11:50 PM
+  */
 class SimpleSettingsSpec extends FunSuite {
 
   val rand = new Random

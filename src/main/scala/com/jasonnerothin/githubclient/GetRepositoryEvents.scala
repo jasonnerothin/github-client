@@ -3,7 +3,7 @@ package com.jasonnerothin.githubclient
 import com.jasonnerothin.githubclient.oauth._
 import net.liftweb.json.JsonAST.JValue
 
-/** Created by IntelliJ IDEA.
+/** Copyright (c) 2013 jasonnerothin.com
   * User: jason
   * Date: 7/16/13
   * Time: 9:37 PM

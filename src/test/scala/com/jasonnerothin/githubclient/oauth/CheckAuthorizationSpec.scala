@@ -11,12 +11,11 @@ import net.liftweb.json.JsonAST.JValue
 import com.jasonnerothin.MyRandom
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/16/13
- * Time: 6:44 PM
- * Provides...
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/16/13
+  * Time: 6:44 PM
+  */
 class CheckAuthorizationSpec extends FunSuite with MockitoSugar {
 
   val timeoutMs = 1

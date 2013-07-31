@@ -5,11 +5,11 @@ import com.jasonnerothin.MyRandom
 import java.rmi.RemoteException
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/25/13
- * Time: 9:45 AM
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/25/13
+  * Time: 9:45 AM
+  */
 class PrintThenNoneSpec extends FunSuite {
 
   val message = MyRandom.randomString(8)

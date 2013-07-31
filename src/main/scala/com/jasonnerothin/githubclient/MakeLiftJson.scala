@@ -6,12 +6,12 @@ import net.liftweb.json.{DefaultFormats, JsonParser}
 import com.ning.http.client.Response
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/23/13
- * Time: 8:07 PM
- * Allows us to mix in a mock responder in place of as.String
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/23/13
+  * Time: 8:07 PM
+  * Allows us to mix in a mock responder in place of as.String
+  */
 class MakeLiftJson(val responder: (Response => String) = as.String)
   extends (Response => json.JValue) {
 

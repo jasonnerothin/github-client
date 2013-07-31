@@ -10,7 +10,7 @@ import org.mockito.Mockito._
 import org.mockito.stubbing.Answer
 
 /**
-  * Created by IntelliJ IDEA.
+  * Copyright (c) 2013 jasonnerothin.com
   * User: jason
   * Date: 7/13/13
   * Time: 7:57 AM

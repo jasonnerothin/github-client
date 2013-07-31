@@ -6,12 +6,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import net.liftweb.json.JsonAST.JValue
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/16/13
- * Time: 6:41 PM
- * Provides an implementation of this API: http://developer.github.com/v3/oauth/#check-an-authorization
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/16/13
+  * Time: 6:41 PM
+  * Provides an implementation of this API: http://developer.github.com/v3/oauth/#check-an-authorization
+  */
 trait CheckAuthorization {
 
   /** Whether token is still valid (has not timed out or been revoked)

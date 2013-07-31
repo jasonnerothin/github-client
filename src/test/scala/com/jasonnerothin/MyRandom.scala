@@ -3,11 +3,11 @@ package com.jasonnerothin
 import scala.util.Random
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/17/13
- * Time: 10:55 PM
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/17/13
+  * Time: 10:55 PM
+  */
 object MyRandom {
 
   val rand = new Random

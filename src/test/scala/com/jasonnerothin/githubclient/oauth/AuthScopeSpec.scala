@@ -3,11 +3,11 @@ package com.jasonnerothin.githubclient.oauth
 import org.scalatest.FunSuite
 
 /**
- * Created by IntelliJ IDEA.
- * User: jason
- * Date: 7/12/13
- * Time: 11:04 PM
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * User: jason
+  * Date: 7/12/13
+  * Time: 11:04 PM
+  */
 class AuthScopeSpec extends FunSuite{
 
   test("default is no_scope"){
