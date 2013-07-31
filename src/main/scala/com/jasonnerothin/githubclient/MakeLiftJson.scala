@@ -1,11 +1,9 @@
 package com.jasonnerothin.githubclient
 
-import com.ning.http.client.Response
 import dispatch._
-import net.liftweb.json._
-import dispatch.as.lift._
 import net.liftweb.json
-import json._
+import net.liftweb.json.{DefaultFormats, JsonParser}
+import com.ning.http.client.Response
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,10 +12,14 @@ import json._
  * Time: 8:07 PM
  * Allows us to mix in a mock responder in place of as.String
  */
-class MakeLiftJson(val responder: (Response => String) = as.String) extends (Response => JValue) {
+class MakeLiftJson(val responder: (Response => String) = as.String)
+  extends (Response => json.JValue) {
 
-  def apply(response: Response) = {
-    (responder andThen JsonParser.parse)(response)
+  implicit val formats = DefaultFormats
+
+  def apply(response: Response): json.JValue = {
+    val jv = (responder andThen JsonParser.parse)(response)
+    jv
   }
 
 }

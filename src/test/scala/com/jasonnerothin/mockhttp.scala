@@ -1,11 +1,13 @@
 package com.jasonnerothin.githubclient
 
 import com.jasonnerothin.githubclient.oauth.{AuthToken, OAuthSettings, CheckAuthorization}
-import org.mockito.Mockito._
+import org.mockito.Matchers
+import org.mockito.Mockito._, Matchers._
 import org.scalatest.mock.MockitoSugar
 import scala.util.Random
 import com.jasonnerothin.MyRandom
-import com.ning.http.client.{AsyncHttpClientConfig, AsyncHttpProvider}
+import com.ning.http.client.{AsyncHandler, Request, AsyncHttpClientConfig, AsyncHttpProvider}
+import scala.concurrent.ExecutionContext
 
 trait MockSugar extends MockitoSugar{
 
@@ -40,6 +42,10 @@ trait MockSugar extends MockitoSugar{
   def $asyncHttpClientConfig(): AsyncHttpClientConfig = {
     mock[AsyncHttpClientConfig]
   }
+
+//  def $executionContext(): ExecutionContext = {
+//    mock[ExecutionContext]
+//  }
 
 }
 

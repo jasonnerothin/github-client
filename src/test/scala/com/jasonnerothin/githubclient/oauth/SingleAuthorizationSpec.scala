@@ -3,19 +3,20 @@ package com.jasonnerothin.githubclient.oauth
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
-import scala.util.Random
-import dispatch._
+import scala.util.{Try, Random}
+import dispatch._, Defaults._
 import org.mockito.Matchers._
 import com.ning.http.client._
 import scala.concurrent.ExecutionContext
 import scala.Predef._
 
 import com.jasonnerothin.githubclient.Mock$._
-import com.jasonnerothin.githubclient.{FakeHttpClient, MakeLiftJson}
+import com.jasonnerothin.githubclient.{FakeHttpProvider, FakeHttpClient, MakeLiftJson}
 import scala.Some
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
-import scala.actors.threadpool.Executor
+import net.liftweb.json
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,7 +30,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
   val defaultId = Math.abs(rand.nextInt())
   val defaultToken = randomString(30)
 
-  implicit val executionContext = mock[ExecutionContext]
+  implicit val oAuthSettings: OAuthSettings = $oAuthSettings()
 
   class FakeResponder(jsonAsString: String = authSuccessJson()) extends (Response => String) {
     def apply(response: Response) = jsonAsString
@@ -37,11 +38,10 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   def systemUnderTest(id: Int = defaultId,
                       tokenStr: String = defaultToken,
-                      settings: OAuthSettings = $oAuthSettings(),
-                      http: Http = mockHttp(authSuccessJson()),
-                      makeJson: MakeLiftJson = new MakeLiftJson(new FakeResponder())): Option[AuthToken] = {
+                      http: HttpExecutor = mockHttp(authSuccessJson()),
+                      makeJson: (Response => json.JValue) = new MakeLiftJson(new FakeResponder())): Option[AuthToken] = {
 
-    (new Object with SingleAuthorization).login(http, makeJson)(settings, executionContext)
+    (new Object with SingleAuthorization).login(http, makeJson)
 
   }
 
@@ -63,8 +63,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   }
 
-  def mockHttp(jsonAsString: String = authSuccessJson()): Http = {
-
+  def mockHttp(jsonAsString: String = authSuccessJson()): HttpExecutor = {
 
     val response = mock[Response]
     doReturn("application/json").when(response).getContentType
@@ -72,26 +71,28 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
     doReturn("OK").when(response).getStatusText
     doReturn(jsonAsString).when(response).getResponseBody
     val buf = ByteBuffer.allocate(jsonAsString.length)
-    for( ch <- jsonAsString.toCharArray ) buf.put(ch.toByte)
+    for (ch <- jsonAsString.toCharArray) buf.put(ch.toByte)
     doReturn(buf).when(response).getResponseBodyAsByteBuffer
     doReturn(buf.array()).when(response).getResponseBodyAsBytes
     doReturn(false).when(response).isRedirected
-//    doReturn(true).when(response).isInstanceOf(isA(classOf[Response]))
 
+    val listenableFuture: ListenableFuture[Response] = mock[ListenableFuture[Response]]
+    doReturn(response).when(listenableFuture).get
+    doReturn(true).when(listenableFuture).isDone
+    doReturn(false).when(listenableFuture).isCancelled
+    doReturn(response).when(listenableFuture).get(isA(classOf[Int]), isA(classOf[TimeUnit]))
 
-    val futureResponse = mock[ListenableFuture[Response]]
-    doReturn(response).when(futureResponse).get
-    doReturn(true).when(futureResponse).isDone
-    doReturn(false).when(futureResponse).isCancelled
-    doReturn(response).when(futureResponse).get(isA(classOf[Int]), isA(classOf[TimeUnit]))
-    doReturn(futureResponse).when(futureResponse).addListener(isA(classOf[Runnable]), any())
+    val futureString = mock[Future[String]]
+    doReturn(Some(Try(jsonAsString))).when(futureString).value
+    doReturn(true).when(futureString).isCompleted
+    doReturn(futureString).when(futureString).map(any())(any[ExecutionContext])
 
-
-    new Http(new FakeHttpClient(futureResponse))
+    val provider = new FakeHttpProvider(response = response, listenableFuture = listenableFuture)
+    new FakeHttpClient(future = futureString, listenableFutureResponse = listenableFuture, provider = provider)
 
   }
 
-  test("login returns an actual AuthToken")(pendingUntilFixed {
+  test("login returns an actual AuthToken") {
 
     val result = systemUnderTest()
     assert(result.isDefined)
@@ -105,12 +106,12 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
       case _ => throw new AssertionError("Actual result is not an AuthToken: %s".format(actual.toString))
     }
 
-  })
+  }
 
-  test("login returns a token in the AuthToken")(pendingUntilFixed {
+  test("login returns a token in the AuthToken") (pendingUntilFixed{
 
     val token = randomString(4)
-    val http = mockHttp(jsonAsString = authSuccessJson(token))
+    val http = mockHttp(jsonAsString = authSuccessJson(tokenStr = token))
     val result = systemUnderTest(http = http, tokenStr = token)
 
     assert(result.isDefined)
@@ -125,7 +126,8 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
   test("login returns an id in the AuthToken")(pendingUntilFixed {
 
     val testId = Math.abs(rand.nextInt())
-    val result = systemUnderTest(settings = $oAuthSettings(), id = testId)
+    val http = mockHttp(jsonAsString = authSuccessJson(id = testId))
+    val result = systemUnderTest(id = testId, http = http)
 
     assert(result.isDefined)
     assert(result.get.id === testId, "Authorization id '%s' returned from the server isn't in the AuthToken.id field: '%s'.".format(testId, result.get.id))

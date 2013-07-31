@@ -6,15 +6,10 @@ repositories {
 
 dependencies {
     compile 'org.scala-lang:scala-library:2.10.2'
-    compile 'org.springframework:spring-web:3.2.3.RELEASE'
 
     compile 'net.databinder.dispatch:dispatch-core_2.10:0.10.1'
-
     compile 'net.databinder.dispatch:dispatch-lift-json_2.10:0.10.1'
-    compile 'net.liftweb:lift-json_2.10:2.5.1'
-
-    compile 'org.json4s:json4s-native_2.10:3.2.4'
-    compile 'org.json4s:json4s-jackson_2.10:3.2.4'
+    compile 'com.ning:async-http-client:1.7.16'
 
     testCompile 'org.scalatest:scalatest_2.10:1.9.1'
     testCompile 'org.mockito:mockito-all:1.9.5'

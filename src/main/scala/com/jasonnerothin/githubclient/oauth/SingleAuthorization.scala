@@ -3,10 +3,13 @@ package com.jasonnerothin.githubclient.oauth
 import dispatch._
 
 import net.liftweb.json._
-import scala.concurrent.ExecutionContext
-import com.ning.http.client.{AsyncHandler, Request, RequestBuilder}
+import scala.concurrent.{Future, ExecutionContext}
+import com.ning.http.client.{Response, Request, RequestBuilder}
 
 import com.jasonnerothin.githubclient.MakeLiftJson
+import scala.util.{Try, Failure, Success}
+import scala.Option
+import net.liftweb.json
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,30 +31,33 @@ trait SingleAuthorization {
     * @param settings OAuth login information
     * @return Option, containing a successful token
     */
-  def login(http: Http, makeJson:MakeLiftJson = new MakeLiftJson())(implicit settings: OAuthSettings, executor: ExecutionContext): Option[AuthToken] = {
+  @throws[MappingException]
+  def login[E <: HttpExecutor,T](myExecutor: E,
+                                 makeJson: (Response => json.JValue) = new MakeLiftJson())
+                              (implicit settings: OAuthSettings,
+                               executor: ExecutionContext): Option[AuthToken] = {
 
-    val reqBuilder: RequestBuilder = url("https://api.github.com/authorizations")
+    val request:RequestBuilder = (host("api.github.com") / "authorizations")
       .secure.as_!(settings.githubUser, settings.githubPassword) <:< Map("Accept" -> "application/json")
-    val fjk:(Request, AsyncHandler[JValue]) = reqBuilder OK makeJson
-    val response = http.apply(fjk)
+    val futureJson = myExecutor.apply(request OK makeJson)
 
-    val parsed = for {jv <- response} yield jv
-    val p2 = parsed map{ p =>
-      p.extract[AuthToken]
+    val jObj = futureJson.completeOption match {
+      case Some(jo:JObject) => jo
+      case _ => JNothing
     }
 
-    val tok = for {
-      tryOpt <- p2.value
-      if tryOpt.isSuccess
-    } yield tryOpt.get
-
-    tok match {
-      case Some(AuthToken(_,_)) => tok
-      case _ => None
+    Try(jObj.extract[Conversion]) match {
+      case Success(c) => Some(AuthToken(c.token, c.id.toInt))
+      case Failure(exc) => {
+        println(exc.getMessage)
+        None
+      }
     }
 
   }
 
 }
+
+protected case class Conversion(token:String, id:String)
 
 object SingleAuthorization extends Object with SingleAuthorization {}
