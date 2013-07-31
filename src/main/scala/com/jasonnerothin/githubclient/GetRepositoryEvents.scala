@@ -22,7 +22,7 @@ import net.liftweb.json.JsonAST.JValue
   * Provides a mechanism for getting repository events: see
   * http://developer.github.com/v3/activity/events/#list-repository-events for more info...
   */
-class GetRepositoryEvents(val repository: String){
+class GetRepositoryEvents(val respositoryName: String){
 
   /** An arbitrary Github RESTful http call.
     * @param token must be authenticated
@@ -32,6 +32,7 @@ class GetRepositoryEvents(val repository: String){
     */
   def call(token: AuthToken, query: Option[Map[String, AnyRef]] = None, params: Option[String])
           (implicit settings: OAuthSettings, authCheck: CheckAuthorization): JValue = {
+    require(authCheck.authorized(token), "Not authorized to get repository events.")
     null
   }
 

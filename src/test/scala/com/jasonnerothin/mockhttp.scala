@@ -40,6 +40,10 @@ trait MockHttpSugar extends MockitoSugar{
     mock[AsyncHttpClientConfig]
   }
 
+  def $checkAuthorization(isAuthorized: Boolean = true): CheckAuthorization = {
+    mock[CheckAuthorization]
+  }
+
 }
 
 object MockHttp$ extends Object with MockHttpSugar
