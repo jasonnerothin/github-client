@@ -29,7 +29,7 @@ REPO=sillytestrepo
 URL_APP="https://api.github.com/repos/$USER/$REPO/events -u ${CLIENT_ID}:${CLIENT_SECRET}" # private repo - connecting AS AN APPLICATION (I've not seen this actually work.)
 URL_USER="https://api.github.com/repos/$USER/$REPO/events -u ${USER}:${PASSWD}" # private repo - connecting AS YOURSELF
 URL_PUBLIC=https://api.github.com/repos/$USER/$REPO/events # public repo
-ETAG=\"3daa27c42e4cdfd0252f0b8c5ee3f9f9\"
+ETAG=\"2632cec2cfe953d2b6effa038266b7e9\"
 X_POLL_INTERVAL=60
 
 # Initial request: You are *required* to grab ETag and
@@ -37,7 +37,7 @@ X_POLL_INTERVAL=60
 
 echo #### INITIAL REQUEST ####
 echo curl $URL_USER -iv
-# curl $URL0 -iv
+# curl $URL_USER -iv
 
 #Example response:
 #> HTTP/1.1 200 OK
@@ -67,9 +67,26 @@ echo checking url @ `date` ....
 START=$(date +"%s")
 TIMEOUT=$(($START + $X_POLL_INTERVAL))
 
+echo #### RECHECK REQUEST AFTER NO MODIFICATIONS ####
+echo curl $URL_USER -H 'If-None-Match: "2632cec2cfe953d2b6effa038266b7e9"' -H "Accept: application/json" -iv
+curl $URL_USER -H 'If-None-Match: "2632cec2cfe953d2b6effa038266b7e9"' -H "Accept: application/json" -iv
+
+#>  HTTP/1.1 304 Not Modified
+#>  Server: GitHub.com
+#>  Date: Thu, 01 Aug 2013 02:17:16 GMT
+#>  Status: 304 Not Modified
+#>  X-RateLimit-Limit: 5000
+#>  X-RateLimit-Remaining: 4999
+#>  X-RateLimit-Reset: 1375326908
+#>  X-Content-Type-Options: nosniff
+#>  Access-Control-Allow-Credentials: true
+#>  Access-Control-Expose-Headers: ETag, Link, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes
+#>  Access-Control-Allow-Origin: *
+#>  Vary: Accept-Encoding
+
 echo #### FOLLOW UP REQUEST ####
-echo curl $URL_PUBLIC -H 'If-None-Match: "3daa27c42e4cdfd0252f0b8c5ee3f9f9"' -H "Accept: application/json" -iv
-# curl $URL_PUBLIC -H 'If-None-Match: "3daa27c42e4cdfd0252f0b8c5ee3f9f9"' -H "Accept: application/json" -iv
+echo curl $URL_PUBLIC -H 'If-None-Match: "2632cec2cfe953d2b6effa038266b7e9"' -H "Accept: application/json" -iv
+# curl $URL_PUBLIC -H 'If-None-Match: "2632cec2cfe953d2b6effa038266b7e9"' -H "Accept: application/json" -iv
 
 #> HTTP/1.1 200 OK
 #> Server: GitHub.com
@@ -81,11 +98,11 @@ echo curl $URL_PUBLIC -H 'If-None-Match: "3daa27c42e4cdfd0252f0b8c5ee3f9f9"' -H 
 #> X-RateLimit-Reset: 1375295349
 #> Cache-Control: private, max-age=60, s-maxage=60
 #> Last-Modified: Thu, 27 Jun 2013 02:08:22 GMT
-#> ETag: "3daa27c42e4cdfd0252f0b8c5ee3f9f9" !!!!!!!! CHANGED !!!!!!!!!
+#> ETag: "2632cec2cfe953d2b6effa038266b7e9" !!!!!!!! CHANGED !!!!!!!!!
 #> X-Poll-Interval: 60
 #> Vary: Accept, Authorization, Cookie
 #> X-GitHub-Media-Type: github.beta
-#> Link: <https://api.github.com/repositories/10984736/events?page=2>; rel="next"
+#> Link: <https://api.github.com/repositories/10984736/events?page=2>; rel="next" !!!! CAPTURE ME !!!
 #> X-Content-Type-Options: nosniff
 #> Content-Length: 787
 #> Access-Control-Allow-Credentials: true
@@ -97,8 +114,8 @@ CAPTURED_RSRC="/repositories/10984736/"
 EVT_URL="https://api.github.com${CAPTURED_RSRC}events?page=1"
 
 echo #### GET THE EVENTS ####
-echo curl $EVT_URL -H 'If-None-Match: "3daa27c42e4cdfd0252f0b8c5ee3f9f9"' -H "Accept: application/json" -iv
-# curl $EVT_URL -H 'If-None-Match: "3daa27c42e4cdfd0252f0b8c5ee3f9f9"' -H "Accept: application/json" -iv
+echo curl $EVT_URL -H 'If-None-Match: "2632cec2cfe953d2b6effa038266b7e9"' -H "Accept: application/json" -iv
+# curl $EVT_URL -H 'If-None-Match: "2632cec2cfe953d2b6effa038266b7e9"' -H "Accept: application/json" -iv
 
 #> HTTP/1.1 200 OK
 #> Server: GitHub.com

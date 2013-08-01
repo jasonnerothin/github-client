@@ -4,13 +4,12 @@ import dispatch._
 
 import net.liftweb.json._
 import scala.concurrent.{Future, ExecutionContext}
-import com.ning.http.client.{Response, Request, RequestBuilder}
+import com.ning.http.client.{Response, RequestBuilder}
 
-import com.jasonnerothin.githubclient.{PrintThenNone, MakeLiftJson}
+import com.jasonnerothin.githubclient.MakeLiftJson
 import scala.util.{Try, Failure, Success}
 import scala.Option
 import net.liftweb.json
-import com.apple.jobjc.NativeObjectLifecycleManager.Nothing
 
 /**
   * Copyright (c) 2013 jasonnerothin.com

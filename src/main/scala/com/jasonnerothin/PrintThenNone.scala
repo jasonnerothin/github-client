@@ -1,4 +1,4 @@
-package com.jasonnerothin.githubclient
+package com.jasonnerothin
 
 /**
   * Copyright (c) 2013 jasonnerothin.com

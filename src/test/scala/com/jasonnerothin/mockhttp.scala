@@ -5,10 +5,23 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import scala.util.Random
 import com.ning.http.client.{AsyncHttpClientConfig, AsyncHttpProvider}
+import com.jasonnerothin.githubclient.api.RepositoryEventTag
 
 trait MockHttpSugar extends MockitoSugar{
 
-  def $authorizationCheck(): CheckAuthorization = {
+  def randomString(len: Int):String = {
+    MyRandom.randomString(len)
+  }
+
+  def $asyncHttpProvider(): AsyncHttpProvider = {
+    mock[AsyncHttpProvider]
+  }
+
+  def $asyncHttpClientConfig(): AsyncHttpClientConfig = {
+    mock[AsyncHttpClientConfig]
+  }
+
+  def $checkAuthorization(isAuthorized: Boolean = true): CheckAuthorization = {
     mock[CheckAuthorization]
   }
 
@@ -28,21 +41,10 @@ trait MockHttpSugar extends MockitoSugar{
     tok
   }
 
-  def randomString(len: Int):String = {
-    MyRandom.randomString(len)
+  def $repositoryEventTag() : RepositoryEventTag = {
+    mock[RepositoryEventTag]
   }
 
-  def $asyncHttpProvider(): AsyncHttpProvider = {
-    mock[AsyncHttpProvider]
-  }
-
-  def $asyncHttpClientConfig(): AsyncHttpClientConfig = {
-    mock[AsyncHttpClientConfig]
-  }
-
-  def $checkAuthorization(isAuthorized: Boolean = true): CheckAuthorization = {
-    mock[CheckAuthorization]
-  }
 
 }
 

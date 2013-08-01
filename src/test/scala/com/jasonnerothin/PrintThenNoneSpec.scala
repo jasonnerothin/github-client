@@ -1,7 +1,6 @@
-package com.jasonnerothin.githubclient
+package com.jasonnerothin
 
 import org.scalatest.FunSuite
-import com.jasonnerothin.MyRandom
 import java.rmi.RemoteException
 
 /**

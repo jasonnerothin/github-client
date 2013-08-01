@@ -35,6 +35,7 @@ trait CheckAuthorization {
     * @return if valid
     */
   def authorized(token: AuthToken, http: Http = new Http(), timeoutMs: Long = 1250)(implicit settings: OAuthSettings): Boolean = {
+    require(token != null, "Token is required for authorization checks.")
 
     // /applications/:client_id/tokens/:access_token
     def authCheck = url("https://api.github.com/applications/%s/tokens/%s".format(settings.clientId, token.token))
