@@ -3,6 +3,7 @@ package com.jasonnerothin.githubclient.api
 import com.jasonnerothin.githubclient.oauth._
 import org.joda.time.DateTime
 import java.net.URL
+import dispatch.{Http, HttpExecutor}
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -43,7 +44,7 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
     * @param authCheck optional check object
     * @return a Pair, containing a RepositoryEventTag and zero or more RepositoryEvents
     */
-  def apply(tag: Option[RepositoryEventTag])
+  def apply(tag: Option[RepositoryEventTag], http: HttpExecutor = Http)
                     (implicit settings: OAuthSettings, token: Option[AuthToken] = None, authCheck: CheckAuthorization = CheckAuthorization): Pair[RepositoryEventTag, List[RepositoryEvent]] = {
     if (!repositoryIsPublic) require(token.isDefined && authCheck.authorized(token.get), "Not authorized to get repository events.")
     for( et:RepositoryEventType.Value <- supportedEventTypes() ){

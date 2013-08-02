@@ -2,20 +2,14 @@ package com.jasonnerothin.githubclient.oauth
 
 import org.scalatest._
 import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito._
-import scala.util.{Try, Random}
+import scala.util.Random
 import dispatch._, Defaults._
-import org.mockito.Matchers._
 import com.ning.http.client._
-import scala.concurrent.ExecutionContext
 import scala.Predef._
 
 import com.jasonnerothin.MockHttp$._
-import scala.Some
-import java.nio.ByteBuffer
-import java.util.concurrent.TimeUnit
 import net.liftweb.json
-import com.jasonnerothin.{FakeHttpProvider, FakeHttpClient}
+import com.jasonnerothin.FakeHttpClient
 import com.jasonnerothin.githubclient.api.MakeLiftJson
 
 /**
@@ -76,32 +70,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
   }
 
   def mockHttp(jsonAsString: String = authSuccessJson(), statusCode:Int = 200): HttpExecutor = {
-
-    val response = mock[Response]
-    doReturn("application/json").when(response).getContentType
-    doReturn(200).when(response).getStatusCode
-    doReturn("OK").when(response).getStatusText
-    doReturn(jsonAsString).when(response).getResponseBody
-    val buf = ByteBuffer.allocate(jsonAsString.length)
-    for (ch <- jsonAsString.toCharArray) buf.put(ch.toByte)
-    doReturn(buf).when(response).getResponseBodyAsByteBuffer
-    doReturn(buf.array()).when(response).getResponseBodyAsBytes
-    doReturn(false).when(response).isRedirected
-
-    val listenableFuture: ListenableFuture[Response] = mock[ListenableFuture[Response]]
-    doReturn(response).when(listenableFuture).get
-    doReturn(true).when(listenableFuture).isDone
-    doReturn(false).when(listenableFuture).isCancelled
-    doReturn(response).when(listenableFuture).get(isA(classOf[Int]), isA(classOf[TimeUnit]))
-
-    val futureString = mock[Future[String]]
-    doReturn(Some(Try(jsonAsString))).when(futureString).value
-    doReturn(true).when(futureString).isCompleted
-    doReturn(futureString).when(futureString).map(any())(any[ExecutionContext])
-
-    val provider = new FakeHttpProvider(response = response, listenableFuture = listenableFuture, statusCode = statusCode)
-    new FakeHttpClient(future = futureString, listenableFutureResponse = listenableFuture, provider = provider)
-
+    FakeHttpClient(jsonAsString, statusCode)
   }
 
   test("login returns an actual AuthToken") {

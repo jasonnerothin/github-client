@@ -13,6 +13,16 @@ import java.util.concurrent.{Callable, TimeUnit}
 import scala.concurrent.Future
 import scala.util.Success
 import com.ning.http.client.listenable.AbstractListenableFuture
+import org.mockito.Mockito._
+import scala.Some
+import scala.util.Success
+import org.scalatest.mock.MockitoSugar.mock
+import java.nio.ByteBuffer
+import org.mockito.Matchers._
+import scala.Some
+import scala.util.Success
+import scala.Some
+import scala.util.Success
 
 class FakeFuture[+T](future: ListenableFuture[T]) extends Object with Future[T] {
 
@@ -119,6 +129,39 @@ class FakeHttpClient[U](val future: Future[U],
 
 }
 
+object FakeHttpClient extends Object with MockHttpSugar{
+
+  def apply(responseAsStr: String, statusCode:Int )(implicit context: ExecutionContext): HttpExecutor = {
+
+    val response = mock[Response]
+    doReturn("application/json").when(response).getContentType
+    doReturn(200).when(response).getStatusCode
+    doReturn("OK").when(response).getStatusText
+    doReturn(responseAsStr).when(response).getResponseBody
+    val buf = ByteBuffer.allocate(responseAsStr.length)
+    for (ch <- responseAsStr.toCharArray) buf.put(ch.toByte)
+    doReturn(buf).when(response).getResponseBodyAsByteBuffer
+    doReturn(buf.array()).when(response).getResponseBodyAsBytes
+    doReturn(false).when(response).isRedirected
+
+    val listenableFuture: ListenableFuture[Response] = mock[ListenableFuture[Response]]
+    doReturn(response).when(listenableFuture).get
+    doReturn(true).when(listenableFuture).isDone
+    doReturn(false).when(listenableFuture).isCancelled
+    doReturn(response).when(listenableFuture).get(isA(classOf[Int]), isA(classOf[TimeUnit]))
+
+    val futureString = mock[Future[String]]
+    doReturn(Some(Try(responseAsStr))).when(futureString).value
+    doReturn(true).when(futureString).isCompleted
+    doReturn(futureString).when(futureString).map(any())(any[ExecutionContext])
+
+    val provider = new FakeHttpProvider(response = response, listenableFuture = listenableFuture, statusCode = statusCode)
+    new FakeHttpClient(future = futureString, listenableFutureResponse = listenableFuture, provider = provider)
+
+  }
+
+}
+
 class FakeHttpProvider(response: Response, listenableFuture: ListenableFuture[Response], statusCode: Int = 200, statusText:String = "OK") extends AsyncHttpProvider {
 
   def execute[U](request: Request, handler: AsyncHandler[U]): ListenableFuture[U] = {
@@ -166,4 +209,5 @@ class FakeHttpProvider(response: Response, listenableFuture: ListenableFuture[Re
   def close(): Unit = {}
 
   def prepareResponse(status: HttpResponseStatus, headers: HttpResponseHeaders, bodyParts: java.util.List[HttpResponseBodyPart]) = response
+
 }

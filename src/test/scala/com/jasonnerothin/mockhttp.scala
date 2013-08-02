@@ -4,7 +4,7 @@ import com.jasonnerothin.githubclient.oauth.{AuthToken, OAuthSettings, CheckAuth
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import scala.util.Random
-import com.ning.http.client.{AsyncHttpClientConfig, AsyncHttpProvider}
+import com.ning.http.client.{Response, ListenableFuture, AsyncHttpClientConfig, AsyncHttpProvider}
 import com.jasonnerothin.githubclient.api.RepositoryEventTag
 
 trait MockHttpSugar extends MockitoSugar{
@@ -44,7 +44,6 @@ trait MockHttpSugar extends MockitoSugar{
   def $repositoryEventTag() : RepositoryEventTag = {
     mock[RepositoryEventTag]
   }
-
 
 }
 

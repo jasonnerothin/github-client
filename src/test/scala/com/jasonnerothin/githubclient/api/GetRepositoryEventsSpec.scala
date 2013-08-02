@@ -1,8 +1,10 @@
 package com.jasonnerothin.githubclient.api
 
 import org.scalatest.FunSuite
-import com.jasonnerothin.MockHttpSugar
+import com.jasonnerothin.{FakeHttpClient, MockHttpSugar}
 import com.jasonnerothin.githubclient.oauth.{CheckAuthorization, AuthToken}
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Copyright (c) 2013 jasonnerothin.com
@@ -23,6 +25,8 @@ import com.jasonnerothin.githubclient.oauth.{CheckAuthorization, AuthToken}
  * Time: 1:33 PM
  */
 class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
+
+  implicit val oAuthSettings = $oAuthSettings()
 
   test("You can't get repository events if you aren't authorized.") {
 
@@ -58,6 +62,8 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
 
   }
 
+  test("If the repository is public, simple auth is not used.")(pending) // Since > 5000 requests per hour with simple auth starts costing $
+
   val events200Headers = """
     |#> HTTP/1.1 200 OK
     |#> Server: GitHub.com
@@ -76,8 +82,7 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
     |#> Access-Control-Expose-Headers: ETag, Link, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes
     |#> Access-Control-Allow-Origin: *
     |#> Vary: Accept-Encoding
-    |
-                         """.stripMargin('>')
+  """.stripMargin('>')
 
   def events200Response(): String = { """
        [
@@ -147,27 +152,37 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
                                       """
   }
 
-  val events304Headers =
-    """
-      |#>  HTTP/1.1 304 Not Modified
-      |#>  Server: GitHub.com
-      |#>  Date: Thu, 01 Aug 2013 02:17:16 GMT
-      |#>  Status: 304 Not Modified
-      |#>  X-RateLimit-Limit: 5000
-      |#>  X-RateLimit-Remaining: 4999
-      |#>  X-RateLimit-Reset: 1375326908
-      |#>  X-Content-Type-Options: nosniff
-      |#>  Access-Control-Allow-Credentials: true
-      |#>  Access-Control-Expose-Headers: ETag, Link, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes
-      |#>  Access-Control-Allow-Origin: *
-      |#>  Vary: Accept-Encoding
-    """.stripMargin('>')
+  val events304Headers = """
+    |#>  HTTP/1.1 304 Not Modified
+    |#>  Server: GitHub.com
+    |#>  Date: Thu, 01 Aug 2013 02:17:16 GMT
+    |#>  Status: 304 Not Modified
+    |#>  X-RateLimit-Limit: 5000
+    |#>  X-RateLimit-Remaining: 4999
+    |#>  X-RateLimit-Reset: 1375326908
+    |#>  X-Content-Type-Options: nosniff
+    |#>  Access-Control-Allow-Credentials: true
+    |#>  Access-Control-Expose-Headers: ETag, Link, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes
+    |#>  Access-Control-Allow-Origin: *
+    |#>  Vary: Accept-Encoding
+  """.stripMargin('>')
+
+
+
+  test("eTag makes it into the request headers")(pending)
+  def temp() = {
+    val getEvents = new GetRepositoryEvents(repositoryName = randomString(4), true)
+    val fakeExecutor = FakeHttpClient(randomString(3), 200)
+    val actual = getEvents.apply(Some($repositoryEventTag()), fakeExecutor)
+
+    val x = 23
+  }
+
+  test("eTag in response headers makes it into RepositoryEventTag")(pending)
 
   test("Passing a None RepositoryEventTag is just fine.")(pending)
 
-  test("eTag makes it into the request headers")(pending)
-
-  test("eTag in response headers makes it into RepositoryEventTag")(pending)
+  test("When an eTag is supplied in the request and another is returned in the response, the RepositoryEventTag reflects the update")(pending)
 
   test("X-Poll-Interval in reponse headers makes it into RepositoryEventTag")(pending)
 
