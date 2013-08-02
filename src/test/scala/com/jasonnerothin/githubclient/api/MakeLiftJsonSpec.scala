@@ -2,6 +2,11 @@ package com.jasonnerothin.githubclient.api
 
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.FunSuite
+import net.liftweb.json.JsonAST._
+import com.ning.http.client.Response
+import net.liftweb.json.JsonAST.JField
+import net.liftweb.json.JsonAST.JInt
+import net.liftweb.json.JsonAST.JObject
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -22,8 +27,45 @@ import org.scalatest.FunSuite
   */
 class MakeLiftJsonSpec extends FunSuite with MockitoSugar{
 
-  test("Empty response results in JNothing") (pending)
+  test("Empty response results in JNothing"){
+    val actual = new MakeLiftJson({r=>""})(mock[Response])
+    assert(actual === JNothing)
+  }
 
-  test("Simple response returns JValue") (pending)
+  def simpleResponse():String = {
+    """
+      |{
+      |  "person": {
+      |    "name": "Joe",
+      |    "age": 35,
+      |    "spouse": {
+      |      "person": {
+      |        "name": "Marilyn"
+      |        "age": 33
+      |      }
+      |    }
+      |  }
+      |}
+    """.stripMargin
+  }
+
+  test("Simple response returns JValue"){
+
+    val actual = new MakeLiftJson({r=>simpleResponse()})(mock[Response])
+
+    val parsed:List[(_,_)] = for{
+      JObject(person) <- actual
+      JField("name", JString(name)) <- person
+      JField("age", JInt(age)) <- person
+    } yield (name,age)
+
+    assert( parsed.length === 2)
+
+    assert( parsed(0)._1 === "Joe")
+    assert( parsed(0)._2 === 35)
+    assert( parsed(1)._1 === "Marilyn")
+    assert( parsed(1)._2 === 33)
+
+  }
 
 }
