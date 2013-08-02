@@ -42,7 +42,6 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
     * @param settings required authentication settings
     * @param authCheck optional check object
     * @return a Pair, containing a RepositoryEventTag and zero or more RepositoryEvents
-    *
     */
   def apply(tag: Option[RepositoryEventTag])
                     (implicit settings: OAuthSettings, token: Option[AuthToken] = None, authCheck: CheckAuthorization = CheckAuthorization): Pair[RepositoryEventTag, List[RepositoryEvent]] = {
@@ -57,10 +56,25 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
 
 }
 
+/** @param eTag value returned with Etag header
+  * @param xPollIntervalInSecs time you must before checking again (without incurring a charge)
+  * @param followLinks paged links that contain events
+  * @param lastChecked time of last check
+  */
 case class RepositoryEventTag(eTag: String, xPollIntervalInSecs: Int = 60, followLinks: List[URL] = List(), lastChecked: DateTime = new DateTime())
 
+/** see http://developer.github.com/v3/activity/events/
+  * class for encapsulating the most important information returned from a call to ``GetRepositoryEvents#apply``
+  * @param repositoryEventType event classification
+  * @param eventId github key
+  * @param isPublic whether the event is publicly available
+  * @param timeOf time of the event
+  * @param commits list of commits pertaining to this event
+  */
 case class RepositoryEvent(repositoryEventType: RepositoryEventType.Value, eventId: BigInt, isPublic: Boolean = false, timeOf: DateTime, commits: List[CommitInfo] = List())
 
+/** see http://developer.github.com/v3/activity/events/types/
+  */
 object RepositoryEventType extends Enumeration {
   type RepositoryEventType = Value
 
