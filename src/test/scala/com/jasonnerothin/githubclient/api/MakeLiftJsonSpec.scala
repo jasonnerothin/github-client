@@ -1,9 +1,7 @@
 package com.jasonnerothin.githubclient.api
 
-import dispatch._
-import net.liftweb.json
-import net.liftweb.json.{DefaultFormats, JsonParser}
-import com.ning.http.client.Response
+import org.scalatest.mock.MockitoSugar
+import org.scalatest.FunSuite
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -19,19 +17,13 @@ import com.ning.http.client.Response
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
-  * Date: 7/23/13
-  * Time: 8:07 PM
-  *
-  * Allows us to mix in a mock responder in place of as.String
+  * Date: 8/1/13
+  * Time: 10:27 PM
   */
-class MakeLiftJson(val responder: (Response => String) = as.String)
-  extends (Response => json.JValue) {
+class MakeLiftJsonSpec extends FunSuite with MockitoSugar{
 
-  implicit val formats = DefaultFormats
+  test("Empty response results in JNothing") (pending)
 
-  def apply(response: Response): json.JValue = {
-    val jv = (responder andThen JsonParser.parse)(response)
-    jv
-  }
+  test("Simple response returns JValue") (pending)
 
 }
