@@ -6,10 +6,10 @@ import net.liftweb.json._
 import scala.concurrent.{Future, ExecutionContext}
 import com.ning.http.client.{Response, RequestBuilder}
 
-import com.jasonnerothin.githubclient.MakeLiftJson
 import scala.util.{Try, Failure, Success}
 import scala.Option
 import net.liftweb.json
+import com.jasonnerothin.githubclient.api.MakeLiftJson
 
 /**
   * Copyright (c) 2013 jasonnerothin.com

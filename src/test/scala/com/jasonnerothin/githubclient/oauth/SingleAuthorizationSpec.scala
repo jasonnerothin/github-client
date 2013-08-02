@@ -11,12 +11,12 @@ import scala.concurrent.ExecutionContext
 import scala.Predef._
 
 import com.jasonnerothin.MockHttp$._
-import com.jasonnerothin.githubclient.MakeLiftJson
 import scala.Some
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 import net.liftweb.json
 import com.jasonnerothin.{FakeHttpProvider, FakeHttpClient}
+import com.jasonnerothin.githubclient.api.MakeLiftJson
 
 /**
   * Copyright (c) 2013 jasonnerothin.com

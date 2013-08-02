@@ -1,4 +1,6 @@
-package com.jasonnerothin.githubclient.plumbing
+package com.jasonnerothin.githubclient.api
+
+import java.net.URL
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -14,7 +16,8 @@ package com.jasonnerothin.githubclient.plumbing
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
-  * Date: 8/1/13
-  * Time: 9:43 AM
+  * Date: 7/31/13
+  * Time: 8:33 PM
   */
-class Blob(sha1:String, fileMode:String) extends GitObject(sha1,fileMode)
+case class CommitInfo(sha: String, author: AuthorInfo, message: String, isDistinct: Boolean, url: URL)
+case class AuthorInfo(name: String, email: String)

@@ -14,4 +14,4 @@ package com.jasonnerothin.githubclient.plumbing
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-trait Tree
+class Tree(sha1:String, fileMode:String) extends GitObject(sha1,fileMode)

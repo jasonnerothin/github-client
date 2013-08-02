@@ -1,4 +1,4 @@
-package com.jasonnerothin.githubclient.plumbing
+package com.jasonnerothin.githubclient.porcelain
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -15,6 +15,6 @@ package com.jasonnerothin.githubclient.plumbing
   * limitations under the License.
   *
   * Date: 8/1/13
-  * Time: 9:43 AM
+  * Time: 3:53 PM
   */
-class Blob(sha1:String, fileMode:String) extends GitObject(sha1,fileMode)
+trait Clone

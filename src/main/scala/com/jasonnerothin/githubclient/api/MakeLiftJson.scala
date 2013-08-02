@@ -1,4 +1,9 @@
-package com.jasonnerothin.githubclient.plumbing
+package com.jasonnerothin.githubclient.api
+
+import dispatch._
+import net.liftweb.json
+import net.liftweb.json.{DefaultFormats, JsonParser}
+import com.ning.http.client.Response
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -14,7 +19,18 @@ package com.jasonnerothin.githubclient.plumbing
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
-  * Date: 8/1/13
-  * Time: 9:43 AM
+  * Date: 7/23/13
+  * Time: 8:07 PM
+  * Allows us to mix in a mock responder in place of as.String
   */
-class Blob(sha1:String, fileMode:String) extends GitObject(sha1,fileMode)
+class MakeLiftJson(val responder: (Response => String) = as.String)
+  extends (Response => json.JValue) {
+
+  implicit val formats = DefaultFormats
+
+  def apply(response: Response): json.JValue = {
+    val jv = (responder andThen JsonParser.parse)(response)
+    jv
+  }
+
+}

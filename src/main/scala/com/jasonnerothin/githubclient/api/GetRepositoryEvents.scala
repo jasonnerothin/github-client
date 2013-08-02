@@ -59,7 +59,7 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
 
 case class RepositoryEventTag(eTag: String, xPollIntervalInSecs: Int = 60, followLinks: List[URL] = List(), lastChecked: DateTime = new DateTime())
 
-case class RepositoryEvent(repositoryEventType: RepositoryEventType.Value, eventId: BigInt, isPublic: Boolean = false, timeOf: DateTime, commits: List[Commit] = List())
+case class RepositoryEvent(repositoryEventType: RepositoryEventType.Value, eventId: BigInt, isPublic: Boolean = false, timeOf: DateTime, commits: List[CommitInfo] = List())
 
 object RepositoryEventType extends Enumeration {
   type RepositoryEventType = Value
