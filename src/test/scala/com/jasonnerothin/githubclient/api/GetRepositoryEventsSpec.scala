@@ -5,6 +5,8 @@ import com.jasonnerothin.{FakeHttpClient, MockHttpSugar}
 import com.jasonnerothin.githubclient.oauth.{CheckAuthorization, AuthToken}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import com.ning.http.client.Request
+import org.mockito.Mockito._
 
 /**
  * Copyright (c) 2013 jasonnerothin.com
@@ -169,14 +171,19 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
 
 
 
-  test("eTag makes it into the request headers")(pending)
-  def temp() = {
-    val getEvents = new GetRepositoryEvents(repositoryName = randomString(4), true)
-    val fakeExecutor = FakeHttpClient(randomString(3), 200)
-    val actual = getEvents.apply(Some($repositoryEventTag()), fakeExecutor)
+  test("eTag makes it into the request headers")(pendingUntilFixed({
 
-    val x = 23
-  }
+    val getEvents = new GetRepositoryEvents(repositoryName = randomString(4), true)
+
+    val request = mock[Request]
+
+    val fakeExecutor = FakeHttpClient(randomString(3), 200) // TODO pass in mock request or fish the request builder object out of the fake
+
+    getEvents(Some($repositoryEventTag()), fakeExecutor)
+
+    verify(request, times(1)).getHeaders()
+
+  }))
 
   test("eTag in response headers makes it into RepositoryEventTag")(pending)
 
