@@ -10,6 +10,7 @@ import scala.util.{Try, Failure, Success}
 import scala.Option
 import net.liftweb.json
 import com.jasonnerothin.githubclient.api.MakeLiftJson
+import com.jasonnerothin.githubclient._
 
 /**
   * Copyright (c) 2013 jasonnerothin.com
@@ -50,7 +51,7 @@ trait SingleAuthorization {
                                executor: ExecutionContext): Option[AuthToken] = {
 
     val request:RequestBuilder = (host("api.github.com") / "authorizations")
-      .secure.as_!(settings.githubUser, settings.githubPassword) <:< Map("Accept" -> "application/json")
+      .secure.as_!(settings.githubUser, settings.githubPassword) <:< acceptJsonHeader()
     val futureJson = Try(myExecutor(request OK makeJson)) getOrElse Future(JNothing)
 
     val jObj = futureJson.completeOption match {
