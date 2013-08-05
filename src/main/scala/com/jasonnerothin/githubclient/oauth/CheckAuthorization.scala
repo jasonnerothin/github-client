@@ -39,7 +39,7 @@ trait CheckAuthorization {
 
     // /applications/:client_id/tokens/:access_token
     def authCheck = url("https://api.github.com/applications/%s/tokens/%s".format(settings.clientId, token.token))
-      .secure.as_!(settings.githubUser, settings.githubPassword) <:< Map("Accept:"-> "application/json")
+      .secure.as_!(settings.githubUser, settings.githubPassword) <:< Map("Accept"-> "application/json")
 
     val result: Future[JValue] = Try(http(authCheck OK as.lift.Json)) getOrElse Future(JNothing)
     Thread.sleep(timeoutMs) // TODO make async
