@@ -4,6 +4,7 @@ import com.jasonnerothin.githubclient.oauth._
 import org.joda.time.DateTime
 import java.net.URL
 import dispatch.{Http, HttpExecutor}
+import org.slf4j.{LoggerFactory, Logger}
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -25,6 +26,8 @@ import dispatch.{Http, HttpExecutor}
   * http://developer.github.com/v3/activity/events/#list-repository-events for more info...
   */
 class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolean = false) {
+
+  private val logger: Logger = LoggerFactory.getLogger(classOf[GetRepositoryEvents])
 
   /** Check the repository for changes. So that unnecessary charges aren't incurred at github,
     * it is advisable to pass an eventTag, since it enables us to check for changes
@@ -48,7 +51,7 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
                     (implicit settings: OAuthSettings, token: Option[AuthToken] = None, authCheck: CheckAuthorization = CheckAuthorization): Pair[RepositoryEventTag, List[RepositoryEvent]] = {
     if (!repositoryIsPublic) require(token.isDefined && authCheck.authorized(token.get), "Not authorized to get repository events.")
     for( et:RepositoryEventType.Value <- supportedEventTypes() ){
-      println( et.toString )
+      logger.debug( et.toString )
     }
     Pair(RepositoryEventTag("eTag"), List())
   }
