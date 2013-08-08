@@ -36,6 +36,8 @@ import scala.Some
  */
 class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
 
+  val emptyResponse = new MakeLiftJson(new EmptyResponder())
+
   implicit val oAuthSettings = $oAuthSettings()
 
   test("You can't get repository events if you aren't authorized.") {
@@ -177,9 +179,7 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
     |#>  Vary: Accept-Encoding
   """.stripMargin('>')
 
-  val emptyResponse = new MakeLiftJson(new EmptyResponder())
-
-  test("eTag makes it into the request headers"){
+  test("ETag makes it into the request headers."){
 
     val testEtag = randomString(30)
 
@@ -189,11 +189,11 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
     val testHeaderName = "ETag"
     val testHeaderValue = testEtag
 
-    verifyHeaders(testHeaderName, testHeaderValue, Some(testEventTag))
+    verifyRequestHeader(testHeaderName, testHeaderValue, Some(testEventTag))
 
   }
 
-  def verifyHeaders(testHeaderName: String, testHeaderValue: String, eventTag: Option[RepositoryEventTag] = None) {
+  def verifyRequestHeader(testHeaderName: String, testHeaderValue: String, eventTag: Option[RepositoryEventTag] = None) {
 
     val config = mock[AsyncHttpClientConfig]
     doReturn(5).when(config).getMaxTotalConnections
@@ -221,33 +221,33 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
 
   }
 
-  test("responseType is set to application/json in request headers"){
+  test("responseType is set to application/json in request headers."){
 
     val accept = "Accept"
     val appJson = "application/json"
 
-    verifyHeaders(accept, appJson, Some($repositoryEventTag()))
+    verifyRequestHeader(accept, appJson, Some($repositoryEventTag()))
 
   }
 
-  test("eTag in response headers makes it into RepositoryEventTag")(pending)
+  test("ETag in response headers makes it into RepositoryEventTag.")(pending)
 
   test("Passing a None RepositoryEventTag is just fine.")(pending)
 
-  test("When an eTag is supplied in the request and another is returned in the response, the RepositoryEventTag reflects the update")(pending)
+  test("When an ETag is supplied in the request and another is returned in the response, the RepositoryEventTag reflects the update.")(pending)
 
-  test("X-Poll-Interval in response headers makes it into RepositoryEventTag")(pending)
+  test("X-Poll-Interval in response headers makes it into RepositoryEventTag.")(pending)
 
-  test("Link in response headers make it into RepositoryEventTag")(pending)
+  test("Linka in response headers make it into RepositoryEventTag.")(pending)
 
-  test("More than one link in response headers make it into RepositoryEventTag")(pending)
+  test("More than one link in response headers make it into RepositoryEventTag.")(pending)
 
-  test("No links in response headers result in empty list of URLs in RepositoryEventTag")(pending)
+  test("No links in response headers result in empty list of URLs in RepositoryEventTag.")(pending)
 
   test("304 Not Modified response header results in RepositoryEventTag unmodified everywhere but lastChecked.")(pending)
 
-  test("RepositoryEventTag#lastChecked comes back more recent than the corresponding is passed in (304 response).")(pending)
+  test("RepositoryEventTag#lastChecked comes back more recent than the corresponding value that was passed in (304 response).")(pending)
 
-  test("RepositoryEventTag#lastChecked comes back more recent than the corresponding is passed in (200 response).")(pending)
+  test("RepositoryEventTag#lastChecked comes back more recent than the corresponding value that was passed in (200 response).")(pending)
 
 }
