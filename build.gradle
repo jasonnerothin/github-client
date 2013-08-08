@@ -17,6 +17,8 @@ dependencies {
     compile 'ch.qos.logback:logback-classic:1.0.13'
     compile 'commons-httpclient:commons-httpclient:3.1'
 
+    testCompile 'javassist:javassist:3.12.1.GA'
+    testCompile 'junit:junit:4.11'
     testCompile 'org.scalatest:scalatest_2.10:1.9.1'
     testCompile 'org.mockito:mockito-all:1.9.5'
 }

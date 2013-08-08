@@ -17,6 +17,8 @@ import com.ning.http.client.resumable.ResumableAsyncHandler;
 import com.ning.http.util.AsyncHttpProviderUtils;
 import com.ning.http.util.ProxyUtils;
 import com.ning.http.util.UTF8UrlEncoder;
+import javassist.CannotCompileException;
+import javassist.NotFoundException;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
@@ -101,6 +103,9 @@ public class TestableApacheAsyncHttpProvider extends ApacheAsyncHttpProvider {
     private HttpClient testClient;
 
     static {
+
+        verifyMyCorrespondingClassHasNotChanged(); // this class will never be loaded if it doesn't reflect (test) the appropriate functionality
+
         final SocketFactory factory = new TrustingSSLSocketFactory();
         Protocol.registerProtocol("https", new Protocol("https", new ProtocolSocketFactory() {
             public Socket createSocket(String string, int i, InetAddress inetAddress, int i1) throws IOException {
@@ -116,6 +121,28 @@ public class TestableApacheAsyncHttpProvider extends ApacheAsyncHttpProvider {
                 return factory.createSocket(string, i);
             }
         }, 443));
+    }
+
+    /**
+     * Because COPY-PASTE-MODIFY is such a terribly bad design decision, we at least need to ensure
+     * that the copy-paste-modified class still corresponds to the same implementing class. Therefore,
+     * we calculate a few checksums to make sure that this class' parent has the same bytecode as the
+     * one it was written against.
+     */
+    private static void verifyMyCorrespondingClassHasNotChanged()  {
+        ChecksumClassFile checksum = new ChecksumClassFile();
+        Class<?> clazz =  ApacheAsyncHttpProvider.class;
+
+        String md5, sha;
+        try{
+            md5 = checksum.md5(clazz);
+            sha = checksum.sha(clazz);
+        } catch(CannotCompileException | NoSuchAlgorithmException | NotFoundException | IOException e){
+            throw new ExceptionInInitializerError(e);
+        }
+
+        if( !md5.equals("PrXXU6W0YOncEoAdb/sbqA==")) throw new ExceptionInInitializerError("Invalid checksum. The test using this class is no longer valid because " + ApacheAsyncHttpProvider.class.getName() + " has changed.");
+        if( !sha.equals("fo9e70O9IDEJl0y2g+6DDqnipYY=")) throw new ExceptionInInitializerError("Invalid checksum. The test using this class is no longer valid because " + ApacheAsyncHttpProvider.class.getName() + " has changed.");
     }
 
     public static class HttpMethodFactory {
