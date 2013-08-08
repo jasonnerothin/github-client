@@ -1,12 +1,20 @@
 package com.jasonnerothin.githubclient.api
 
 import org.scalatest.FunSuite
-import com.jasonnerothin.{FakeHttpClient, MockHttpSugar}
-import com.jasonnerothin.githubclient.oauth.{CheckAuthorization, AuthToken}
+import com.jasonnerothin._
+import com.jasonnerothin.githubclient.oauth.CheckAuthorization
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import com.ning.http.client.Request
+import com.ning.http.client.{Request, AsyncHttpClientConfig}
 import org.mockito.Mockito._
+import org.apache.commons.httpclient._
+import java.util.concurrent.Executors
+import org.mockito.Matchers
+import org.mockito.Matchers._
+import org.apache.commons.httpclient.params.HttpClientParams
+import com.ning.http.client.providers.apache.TestableApacheAsyncHttpProvider.HttpMethodFactory
+import com.jasonnerothin.githubclient.oauth.AuthToken
+import scala.Some
 
 /**
  * Copyright (c) 2013 jasonnerothin.com
@@ -169,21 +177,58 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
     |#>  Vary: Accept-Encoding
   """.stripMargin('>')
 
+  val emptyResponse = new MakeLiftJson(new EmptyResponder())
 
+  test("eTag makes it into the request headers"){
 
-  test("eTag makes it into the request headers")(pendingUntilFixed({
+    val testEtag = randomString(30)
 
+    val testEventTag: RepositoryEventTag = $repositoryEventTag()
+    doReturn(testEtag).when(testEventTag).eTag
+
+    val testHeaderName = "ETag"
+    val testHeaderValue = testEtag
+
+    verifyHeaders(testHeaderName, testHeaderValue, Some(testEventTag))
+
+  }
+
+  def verifyHeaders(testHeaderName: String, testHeaderValue: String, eventTag: Option[RepositoryEventTag] = None) {
+
+    val config = mock[AsyncHttpClientConfig]
+    doReturn(5).when(config).getMaxTotalConnections
+    doReturn(1000000).when(config).getRequestTimeoutInMs
+    doReturn(Executors.newFixedThreadPool(2)).when(config).executorService()
+    doReturn(Executors.newScheduledThreadPool(1)).when(config).reaper()
+
+    val client: HttpClient = mock[HttpClient]
+    doReturn(200).when(client).executeMethod(Matchers.isA(classOf[HttpMethodBase]))
+    val params: HttpClientParams = mock[HttpClientParams]
+    doReturn(params).when(client).getParams
+    val httpState = mock[HttpState]
+    doReturn(httpState).when(client).getState
+
+    val methodFactory: HttpMethodFactory = mock[HttpMethodFactory]
+    val method: HttpMethodBase = mock[HttpMethodBase]
+    doReturn(method).when(methodFactory).createMethod(anyString(), isA(classOf[Request]))
+
+    val fakeExecutor = FakeHttpClient(randomString(3), 200, Some(new TestableHttpProvider(config, client, methodFactory = methodFactory)))
     val getEvents = new GetRepositoryEvents(repositoryName = randomString(4), true)
 
-    val request = mock[Request]
+    getEvents(eventTag, fakeExecutor, emptyResponse)($oAuthSettings(), Some($authToken()))
 
-    val fakeExecutor = FakeHttpClient(randomString(3), 200) // TODO pass in mock request or fish the request builder object out of the fake
+    verify(method).setRequestHeader(testHeaderName, testHeaderValue)
 
-    getEvents(Some($repositoryEventTag()), fakeExecutor)
+  }
 
-    verify(request, times(1)).getHeaders()
+  test("responseType is set to application/json in request headers"){
 
-  }))
+    val accept = "Accept"
+    val appJson = "application/json"
+
+    verifyHeaders(accept, appJson, Some($repositoryEventTag()))
+
+  }
 
   test("eTag in response headers makes it into RepositoryEventTag")(pending)
 
@@ -191,7 +236,7 @@ class GetRepositoryEventsSpec extends FunSuite with MockHttpSugar {
 
   test("When an eTag is supplied in the request and another is returned in the response, the RepositoryEventTag reflects the update")(pending)
 
-  test("X-Poll-Interval in reponse headers makes it into RepositoryEventTag")(pending)
+  test("X-Poll-Interval in response headers makes it into RepositoryEventTag")(pending)
 
   test("Link in response headers make it into RepositoryEventTag")(pending)
 

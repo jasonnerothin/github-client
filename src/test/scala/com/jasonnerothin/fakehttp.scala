@@ -7,23 +7,38 @@ import scala.concurrent._
 import scala.util.Try
 
 import com.jasonnerothin.MockHttp$._
-import scala.Some
 import scala.reflect.ClassTag
 import java.util.concurrent.{Callable, TimeUnit}
 import scala.concurrent.Future
-import scala.util.Success
 import com.ning.http.client.listenable.AbstractListenableFuture
 import org.mockito.Mockito._
-import scala.Some
-import scala.util.Success
 import org.scalatest.mock.MockitoSugar.mock
 import java.nio.ByteBuffer
 import org.mockito.Matchers._
 import scala.Some
 import scala.util.Success
-import scala.Some
-import scala.util.Success
+import com.ning.http.client.providers.apache.TestableApacheAsyncHttpProvider
+import org.apache.commons.httpclient.HttpClient
+import java.io.IOException
+import com.ning.http.client.providers.apache.TestableApacheAsyncHttpProvider.HttpMethodFactory
 
+
+/**
+  * Copyright (c) 2013 jasonnerothin.com
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  * http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  *
+  */
 class FakeFuture[+T](future: ListenableFuture[T]) extends Object with Future[T] {
 
   implicit def listenableFuture2Future(listenableFuture: ListenableFuture[_]): Future[T] = {
@@ -131,7 +146,7 @@ class FakeHttpClient[U](val future: Future[U],
 
 object FakeHttpClient extends Object with MockHttpSugar{
 
-  def apply(responseAsStr: String, statusCode:Int )(implicit context: ExecutionContext): HttpExecutor = {
+  def apply(responseAsStr: String = "", statusCode:Int = 200, httpProvider: Option[AsyncHttpProvider] = Some(new TestableApacheAsyncHttpProvider(mock[AsyncHttpClientConfig])))(implicit context: ExecutionContext): HttpExecutor = {
 
     val response = mock[Response]
     doReturn("application/json").when(response).getContentType
@@ -155,7 +170,7 @@ object FakeHttpClient extends Object with MockHttpSugar{
     doReturn(true).when(futureString).isCompleted
     doReturn(futureString).when(futureString).map(any())(any[ExecutionContext])
 
-    val provider = new FakeHttpProvider(response = response, listenableFuture = listenableFuture, statusCode = statusCode)
+    val provider = httpProvider getOrElse new FakeHttpProvider(response = response, listenableFuture = listenableFuture, statusCode = statusCode)
     new FakeHttpClient(future = futureString, listenableFutureResponse = listenableFuture, provider = provider)
 
   }
@@ -210,4 +225,19 @@ class FakeHttpProvider(response: Response, listenableFuture: ListenableFuture[Re
 
   def prepareResponse(status: HttpResponseStatus, headers: HttpResponseHeaders, bodyParts: java.util.List[HttpResponseBodyPart]) = response
 
+}
+
+class TestableHttpProvider(config: AsyncHttpClientConfig, client: HttpClient = mock[HttpClient], methodFactory: HttpMethodFactory = mock[HttpMethodFactory]) extends TestableApacheAsyncHttpProvider(config){
+
+  @throws[IOException]
+  override def execute[T](request: Request, handler: AsyncHandler[T]): ListenableFuture[T] = {
+    setTestClient(client)
+    setTestMethodFactory(methodFactory)
+    super.execute(request, handler)
+  }
+
+}
+
+class EmptyResponder extends (Response => String) {
+  def apply(v1: Response) = ""
 }

@@ -42,6 +42,7 @@ trait SingleAuthorization {
   /** Request an OAuth token.
     *
     * @param settings OAuth login information
+    * @param makeJson a mechanism for mocking out the as.lift.Json function
     * @return Option, containing a successful token
     */
   @throws[MappingException]

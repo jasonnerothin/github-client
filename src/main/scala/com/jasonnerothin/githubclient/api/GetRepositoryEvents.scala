@@ -1,10 +1,17 @@
 package com.jasonnerothin.githubclient.api
 
+import dispatch._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import com.jasonnerothin.githubclient.oauth._
+import com.jasonnerothin.githubclient._
 import org.joda.time.DateTime
-import java.net.URL
-import dispatch.{Http, HttpExecutor}
 import org.slf4j.{LoggerFactory, Logger}
+import java.net.URL
+import com.ning.http.client.{RequestBuilder, Response}
+import net.liftweb.json
+import scala.Nothing
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -47,13 +54,27 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
     * @param authCheck optional check object
     * @return a Pair, containing a RepositoryEventTag and zero or more RepositoryEvents
     */
-  def apply(tag: Option[RepositoryEventTag], http: HttpExecutor = Http)
+  def apply(tag: Option[RepositoryEventTag], http: HttpExecutor = Http, makeJson: (Response => json.JValue) = new MakeLiftJson())
                     (implicit settings: OAuthSettings, token: Option[AuthToken] = None, authCheck: CheckAuthorization = CheckAuthorization): Pair[RepositoryEventTag, List[RepositoryEvent]] = {
     if (!repositoryIsPublic) require(token.isDefined && authCheck.authorized(token.get), "Not authorized to get repository events.")
     for( et:RepositoryEventType.Value <- supportedEventTypes() ){
       logger.debug( et.toString )
     }
-    Pair(RepositoryEventTag("eTag"), List())
+
+    def baseRequest():RequestBuilder = {
+      url("https://api.github.com/repos/%s/%s/events".format(repositoryName,settings.githubUser))
+        .secure.as_!(settings.githubUser, settings.githubPassword) <:< acceptJsonHeader()
+    }
+
+    val request = tag match {
+      case Some(t) =>  baseRequest() <:< Map("ETag" -> t.eTag)
+      case None => baseRequest()
+    }
+
+    val json = http(request OK makeJson )
+
+    Pair(RepositoryEventTag("eTag"), List()) // dummy return val
+
   }
 
   private def supportedEventTypes(): List[RepositoryEventType.Value] = List(RepositoryEventType.DeleteEvent, RepositoryEventType.ForkApplyEvent, RepositoryEventType.PushEvent)

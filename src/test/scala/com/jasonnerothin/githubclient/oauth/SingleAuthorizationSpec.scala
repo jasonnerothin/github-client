@@ -9,7 +9,7 @@ import scala.Predef._
 
 import com.jasonnerothin.MockHttp$._
 import net.liftweb.json
-import com.jasonnerothin.FakeHttpClient
+import com.jasonnerothin.{FakeHttpProvider, FakeHttpClient}
 import com.jasonnerothin.githubclient.api.MakeLiftJson
 
 /**
@@ -70,7 +70,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
   }
 
   def mockHttp(jsonAsString: String = authSuccessJson(), statusCode:Int = 200): HttpExecutor = {
-    FakeHttpClient(jsonAsString, statusCode)
+    FakeHttpClient(jsonAsString, statusCode, httpProvider = None)
   }
 
   test("login returns an actual AuthToken") {
@@ -123,16 +123,6 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
   test("login returns None when authorization fails"){
 
     val http = mockHttp(authSuccessJson(), statusCode = 401)
-
-//    val response = mock[Response]
-//    doReturn(401).when(response).getStatusCode
-
-//    val futureResponse = mock[Future[Response]]
-//    doReturn(true).when(futureResponse).isCompleted
-//    doReturn(Some(response)).when(futureResponse).value
-//    doReturn(Some(response)).when(futureResponse).completeOption
-
-//    doReturn(futureResponse).when(http).apply(isA(classOf[RequestBuilder]))(any[ExecutionContext])
 
     val actual = systemUnderTest(http = http)
     assert(actual === None)
