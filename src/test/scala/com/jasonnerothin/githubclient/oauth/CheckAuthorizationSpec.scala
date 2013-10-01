@@ -2,13 +2,10 @@ package com.jasonnerothin.githubclient.oauth
 
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.FunSuite
-import com.ning.http.client.{AsyncHandler, Response, Request}
+import com.ning.http.client.Response
 import _root_.dispatch.Http
 import org.mockito.Mockito._
-import org.mockito.Matchers._
-import scala.concurrent.{Future, ExecutionContext}
-import net.liftweb.json.JsonAST.JValue
-import com.jasonnerothin.MyRandom
+import com.jasonnerothin.MockHttpSugar
 
 /**
   * Copyright (c) 2013 jasonnerothin.com
@@ -28,13 +25,13 @@ import com.jasonnerothin.MyRandom
   * Date: 7/16/13
   * Time: 6:44 PM
   */
-class CheckAuthorizationSpec extends FunSuite with MockitoSugar {
+class CheckAuthorizationSpec extends FunSuite with MockitoSugar with MockHttpSugar {
 
   val timeoutMs = 1
 
   implicit val settings:OAuthSettings = mockSettings()
 
-  def systemUnderTest(token: AuthToken = mockAuthToken(), http: Http = mockHttp()):Boolean= {
+  def systemUnderTest(token: AuthToken = $authToken(randomString(1)), http: Http = $http()):Boolean= {
     CheckAuthorization.authorized(token = token, http = http, timeoutMs = timeoutMs)
   }
 
@@ -47,27 +44,9 @@ class CheckAuthorizationSpec extends FunSuite with MockitoSugar {
     settings
   }
 
-  def mockAuthToken(token: String = randomString(1)): AuthToken = {
-    val tok: AuthToken = mock[AuthToken]
-    doReturn(token).when(tok).token
-
-    tok
-  }
-
-  def mockHttp(result: Boolean = false): Http = {
-    val futureResponse: Future[JValue] = mock[Future[JValue]]
-    doReturn(result).when(futureResponse).isCompleted
-
-    val http = mock[Http]
-    //    doReturn(futureResponse).when(http).apply(isA(classOf[RequestBuilder]))(any[ExecutionContext])
-    doReturn(futureResponse).when(http).apply(isA(classOf[(Request, AsyncHandler[Boolean])]))(any[ExecutionContext])
-
-    http
-  }
-
   test("authorized returns false when response doesn't come back quickly enough") {
 
-    val act = systemUnderTest()
+    val act = systemUnderTest(http=$http(isCompleted = false))
     assert(act === false)
 
   }
@@ -85,7 +64,7 @@ class CheckAuthorizationSpec extends FunSuite with MockitoSugar {
   def statusCodeMeans(statusCode: Int, authorized: Boolean) {
     val mockResponse = mock[Response]
     doReturn(statusCode).when(mockResponse).getStatusCode
-    val aMockHttp = mockHttp(authorized)
+    val aMockHttp = $http(authorized)
     assert(systemUnderTest(http = aMockHttp) === authorized, "authorized should = %s with code = %s".format(authorized, statusCode))
   }
 
@@ -107,7 +86,5 @@ class CheckAuthorizationSpec extends FunSuite with MockitoSugar {
     statusCodeMeans(-123, authorized = false)
 
   }
-
-  def randomString(len: Int) = MyRandom.randomString(len)
 
 }

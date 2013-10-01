@@ -5,13 +5,20 @@ import dispatch._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import com.jasonnerothin.githubclient.oauth._
+import com.jasonnerothin.githubclient.api._
 import com.jasonnerothin.githubclient._
 import org.joda.time.DateTime
 import org.slf4j.{LoggerFactory, Logger}
 import java.net.URL
 import com.ning.http.client.{RequestBuilder, Response}
 import net.liftweb.json
-import scala.Nothing
+import scala.util.{Failure, Success, Try}
+import net.liftweb.json.JsonAST.JValue
+import net.liftweb.json.JsonAST._
+import net.liftweb.json.{JsonAST, DefaultFormats}
+import com.jasonnerothin.githubclient.oauth.AuthToken
+import scala.Some
+import dispatch._
 
 /** Copyright (c) 2013 jasonnerothin.com
   *
@@ -34,6 +41,7 @@ import scala.Nothing
   */
 class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolean = false) {
 
+  implicit val Formats = DefaultFormats
   private val logger: Logger = LoggerFactory.getLogger(classOf[GetRepositoryEvents])
 
   /** Check the repository for changes. So that unnecessary charges aren't incurred at github,
@@ -55,8 +63,11 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
     * @return a Pair, containing a RepositoryEventTag and zero or more RepositoryEvents
     */
   def apply(tag: Option[RepositoryEventTag], http: HttpExecutor = Http, makeJson: (Response => json.JValue) = new MakeLiftJson())
-                    (implicit settings: OAuthSettings, token: Option[AuthToken] = None, authCheck: CheckAuthorization = CheckAuthorization): Pair[RepositoryEventTag, List[RepositoryEvent]] = {
-    if (!repositoryIsPublic) require(token.isDefined && authCheck.authorized(token.get), "Not authorized to get repository events.")
+                    (implicit settings: OAuthSettings, token: Option[AuthToken] = None, authCheck: CheckAuthorization = CheckAuthorization)
+            : Pair[RepositoryEventTag, List[RepositoryEvent]] = {
+
+    if (!repositoryIsPublic) require(token.isDefined && authCheck.authorized(token.get)(settings), "Not authorized to get repository events.")
+    logger.debug("Supported event types:")
     for( et:RepositoryEventType.Value <- supportedEventTypes() ){
       logger.debug( et.toString )
     }
@@ -71,13 +82,33 @@ class GetRepositoryEvents(val repositoryName: String, repositoryIsPublic: Boolea
       case None => baseRequest()
     }
 
-    val json = http(request OK makeJson )
+//    val g = GetETag
+    request OK makeJson
 
-    Pair(RepositoryEventTag("eTag"), List()) // dummy return val
+    val e = new ETagExtractor // Response -> String (etag)
+    val f = makeJson // Response -> json.JValue
+
+    val eTag = for( tag <- http( request > e ) ) yield tag
+
+//    val json = http(request OK makeJson )
+//    json match {
+//      case Success(JArray(t)) => t
+//      case Failure(e) => {
+//        logger.error(e.getMessage)
+//        JNothing
+//      }
+//    }
+
+    Pair(RepositoryEventTag(eTag.completeOption.getOrElse("NONE")), List()) // dummy return val
 
   }
 
-  private def supportedEventTypes(): List[RepositoryEventType.Value] = List(RepositoryEventType.DeleteEvent, RepositoryEventType.ForkApplyEvent, RepositoryEventType.PushEvent)
+  private def supportedEventTypes(): List[RepositoryEventType.Value] = List(
+    RepositoryEventType.CreateEvent
+    , RepositoryEventType.DeleteEvent
+    , RepositoryEventType.ForkApplyEvent
+    , RepositoryEventType.PushEvent
+  )
 
 }
 

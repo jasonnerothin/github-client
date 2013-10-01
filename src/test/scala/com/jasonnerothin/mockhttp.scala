@@ -4,8 +4,17 @@ import com.jasonnerothin.githubclient.oauth.{AuthToken, OAuthSettings, CheckAuth
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import scala.util.Random
-import com.ning.http.client.{Response, ListenableFuture, AsyncHttpClientConfig, AsyncHttpProvider}
+import com.ning.http.client._
 import com.jasonnerothin.githubclient.api.RepositoryEventTag
+import org.mockito.Matchers
+import org.mockito.Matchers._
+import dispatch.Http
+import scala.concurrent.{ExecutionContext, Future}
+import net.liftweb.json.JsonAST.JValue
+import com.jasonnerothin.githubclient.api.RepositoryEventTag
+import com.jasonnerothin.githubclient.oauth.AuthToken
+import com.jasonnerothin.githubclient.api.RepositoryEventTag
+import com.jasonnerothin.githubclient.oauth.AuthToken
 
 trait MockHttpSugar extends MockitoSugar{
 
@@ -21,8 +30,13 @@ trait MockHttpSugar extends MockitoSugar{
     mock[AsyncHttpClientConfig]
   }
 
-  def $checkAuthorization(isAuthorized: Boolean = true): CheckAuthorization = {
-    mock[CheckAuthorization]
+  def $checkAuthorization(isAuthorized: Boolean = true, http: Http = mock[Http], timeout: Long = 1L): CheckAuthorization = {
+    val checkAuth = mock[CheckAuthorization]
+    doReturn(isAuthorized).when(checkAuth).authorized(isA(classOf[AuthToken]), Matchers.eq(http), Matchers.eq(timeout))(isA(classOf[OAuthSettings]))
+//    doReturn(isAuthorized).when(checkAuth).authorized(isA(classOf[AuthToken]), Matchers.isNull(classOf[Http]), Matchers.isNull(classOf[Long]))(isA(classOf[OAuthSettings]))
+//    doReturn(isAuthorized).when(checkAuth).authorized(isA(classOf[AuthToken]), Matchers.isNull(classOf[Http]), Matchers.eq(timeout))(isA(classOf[OAuthSettings]))
+//    doReturn(isAuthorized).when(checkAuth).authorized(isA(classOf[AuthToken]), Matchers.eq(http), Matchers.isNull(classOf[Long]))(isA(classOf[OAuthSettings]))
+    checkAuth
   }
 
   def $oAuthSettings(): OAuthSettings = {
@@ -34,15 +48,23 @@ trait MockHttpSugar extends MockitoSugar{
     settings
   }
 
-  def $authToken(): AuthToken = {
+  def $authToken(tokStr:String = randomString(18)): AuthToken = {
     val tok = mock[AuthToken]
     doReturn(new Random().nextInt()).when(tok).id
-    doReturn(randomString(18)).when(tok).token
+    doReturn(tokStr).when(tok).token
     tok
   }
 
   def $repositoryEventTag() : RepositoryEventTag = {
     mock[RepositoryEventTag]
+  }
+
+  def $http(isCompleted:Boolean = true) : Http = {
+    val http = mock[Http]
+    val futureResponse: Future[JValue] = mock[Future[JValue]]
+    doReturn(isCompleted).when(futureResponse).isCompleted
+    doReturn(futureResponse).when(http).apply(isA(classOf[(Request, AsyncHandler[Boolean])]))(any[ExecutionContext])
+    http
   }
 
 }

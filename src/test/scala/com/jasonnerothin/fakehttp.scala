@@ -150,7 +150,7 @@ object FakeHttpClient extends Object with MockHttpSugar{
 
     val response = mock[Response]
     doReturn("application/json").when(response).getContentType
-    doReturn(200).when(response).getStatusCode
+    doReturn(statusCode).when(response).getStatusCode
     doReturn("OK").when(response).getStatusText
     doReturn(responseAsStr).when(response).getResponseBody
     val buf = ByteBuffer.allocate(responseAsStr.length)
@@ -240,4 +240,8 @@ class TestableHttpProvider(config: AsyncHttpClientConfig, client: HttpClient = m
 
 class EmptyResponder extends (Response => String) {
   def apply(v1: Response) = ""
+}
+
+class FakeResponder(responseString: String) extends (Response => String){
+  def apply(response:Response) = responseString
 }

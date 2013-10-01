@@ -44,7 +44,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   def systemUnderTest(id: Int = defaultId,
                       myTokenStr: String = defaultToken,
-                      http: HttpExecutor = mockHttp(authSuccessJson(tokenStr = defaultToken, id=defaultId)),
+                      http: HttpExecutor = fakeExecutor(authSuccessJson(tokenStr = defaultToken, id=defaultId)),
                       makeJson: (Response => json.JValue) = new MakeLiftJson(new FakeResponder())): Option[AuthToken] = {
 
     (new Object with SingleAuthorization).login(http, makeJson)
@@ -69,7 +69,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   }
 
-  def mockHttp(jsonAsString: String = authSuccessJson(), statusCode:Int = 200): HttpExecutor = {
+  def fakeExecutor(jsonAsString: String = authSuccessJson(), statusCode:Int = 200): HttpExecutor = {
     FakeHttpClient(jsonAsString, statusCode, httpProvider = None)
   }
 
@@ -102,7 +102,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   def parameterizedSUT(token: String, testId: Int): Option[AuthToken] = {
     val json = authSuccessJson(tokenStr = token, id = testId)
-    val http = mockHttp(jsonAsString = json)
+    val http = fakeExecutor(jsonAsString = json)
     val result = systemUnderTest(http = http, makeJson = new MakeLiftJson(new FakeResponder(jsonAsString = json)))
     result
   }
@@ -122,7 +122,7 @@ class SingleAuthorizationSpec extends FunSuite with MockitoSugar {
 
   test("login returns None when authorization fails"){
 
-    val http = mockHttp(authSuccessJson(), statusCode = 401)
+    val http = fakeExecutor(authSuccessJson(), statusCode = 401)
 
     val actual = systemUnderTest(http = http)
     assert(actual === None)

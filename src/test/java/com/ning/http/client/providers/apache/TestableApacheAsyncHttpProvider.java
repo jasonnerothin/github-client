@@ -61,33 +61,33 @@ import static com.ning.http.util.AsyncHttpProviderUtils.DEFAULT_CHARSET;
 import static com.ning.http.util.MiscUtil.isNonEmpty;
 
 /**
- * Copyright (c) 2013 jasonnerothin.com
- * <p/>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p/>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * <p/>
- * An {@link com.ning.http.client.AsyncHttpProvider} for Apache Http Client 3.1
- * <p/>
- * THIS CLASS IS COPY-PASTE-MODIFY of {@link ApacheAsyncHttpProvider} in
- * commons-httpclient:commons-httpclient:3.1 .
- * <p/>
- * Justification: As ugly as it is, the author needed to test code that relies upon
- * {@link #execute(com.ning.http.client.Request, com.ning.http.client.AsyncHandler)}.
- * This method is, to his knowledge, unpenetrable with mocks, spies and other nice
- * techniques, and writing a decompiler seemed like overkill.
- * <p/>
- * Date: 8/6/13
- * Time: 10:21 AM
- */
+  * Copyright (c) 2013 jasonnerothin.com
+  * <p/>
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  * <p/>
+  * http://www.apache.org/licenses/LICENSE-2.0
+  * <p/>
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  * <p/>
+  * An {@link com.ning.http.client.AsyncHttpProvider} for Apache Http Client 3.1
+  * <p/>
+  * THIS CLASS IS COPY-PASTE-MODIFY of {@link ApacheAsyncHttpProvider} in
+  * commons-httpclient:commons-httpclient:3.1 .
+  * <p/>
+  * Justification: As ugly as it is, the author needed to test code that relies upon
+  * {@link #execute(com.ning.http.client.Request, com.ning.http.client.AsyncHandler)}.
+  * This method is, to his knowledge, unpenetrable with mocks, spies and other nice
+  * techniques, and writing a decompiler seemed like overkill.
+  * <p/>
+  * Date: 8/6/13
+  * Time: 10:21 AM
+  */
 public class TestableApacheAsyncHttpProvider extends ApacheAsyncHttpProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(TestableApacheAsyncHttpProvider.class);
